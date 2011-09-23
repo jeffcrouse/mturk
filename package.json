@@ -1,6 +1,6 @@
 {
     "name": "expensecat-mturk"
-  , "version": "0.0.1"
+  , "version": "0.0.2"
   , "private": true
   , "dependencies": {
       "request": "1.9.8"
@@ -10,5 +10,6 @@
     , "winston": "0.3.3"
     , "underscore": "1.1.7"
     , "sax": "0.2.3"
+    , "nock": "0.1.x"
   }
 }

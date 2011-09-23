@@ -6,15 +6,17 @@ var config = {
   , secretAccessKey: "fksdlfkjsdlkfjsdlfkjslkfjsdlkfjsdlkfjsdlfkj"
 }
   , assert  = require('assert')
-  , mockHttpRequest = require('../mock_http_request')
+  , nock = require('nock')
+  , filterBody = require('../filterBody')
   , Assignment = require('../../model/assignment')(config);
 
 exports.testApprove = function(beforeExit) {
   var calledback = false;
   
-  mockHttpRequest(
-    'http://mechanicalturk.amazonaws.com/&assignmentId=abcdefghijklmnop123&RequesterFeedback=this%20is%20feedback%20from%20the%20requester&Service=AWSMechanicalTurkRequester&Operation=ApproveAssignment',
-    __dirname + '/../static/assignment_approve_response.xml');
+  var mturk = nock('http://mechanicalturk.amazonaws.com')
+                .filteringRequestBody(filterBody)
+                .post('/', 'assignmentId=abcdefghijklmnop123&RequesterFeedback=this%20is%20feedback%20from%20the%20requester&Service=AWSMechanicalTurkRequester&Operation=ApproveAssignment')
+                .replyWithFile(200, __dirname + '/../static/assignment_approve_response.xml');
 
   Assignment.approve('abcdefghijklmnop123', 'this is feedback from the requester', function(err) {
     assert.ok(! calledback);
@@ -23,6 +25,7 @@ exports.testApprove = function(beforeExit) {
   });
   
   beforeExit(function() {
+    mturk.done();
     assert.ok(calledback);
   });
 };
@@ -30,11 +33,12 @@ exports.testApprove = function(beforeExit) {
 
 exports.testReject = function(beforeExit) {
   var calledback = false;
-  
-  mockHttpRequest(
-    'http://mechanicalturk.amazonaws.com/&assignmentId=abcdefghijklmnop123&RequesterFeedback=this%20is%20feedback%20from%20the%20requester&Service=AWSMechanicalTurkRequester&Operation=RejectAssignment',
-    __dirname + '/../static/assignment_reject_response.xml');
 
+  var mturk = nock('http://mechanicalturk.amazonaws.com')
+                .filteringRequestBody(filterBody)
+                .post('/', 'assignmentId=abcdefghijklmnop123&RequesterFeedback=this%20is%20feedback%20from%20the%20requester&Service=AWSMechanicalTurkRequester&Operation=RejectAssignment')
+                .replyWithFile(200, __dirname + '/../static/assignment_reject_response.xml');
+  
   Assignment.reject('abcdefghijklmnop123', 'this is feedback from the requester', function(err) {
     assert.ok(! calledback);
     calledback = true;
@@ -42,6 +46,7 @@ exports.testReject = function(beforeExit) {
   });
   
   beforeExit(function() {
+    mturk.done();
     assert.ok(calledback);
   });
 };

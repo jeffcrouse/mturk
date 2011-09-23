@@ -5,8 +5,9 @@ var config = {
     }
   , secretAccessKey: "fksdlfkjsdlkfjsdlfkjslkfjsdlkfjsdlkfjsdlfkj"
 }
-,   assert          = require('assert')
-  , mockHttpRequest = require('../mock_http_request')
+  , assert          = require('assert')
+  , nock        = require('nock')
+  , filterBody  = require('../filterBody')
   , HIT             = require('../../model/hit')(config)
   , Question        = require('../../model/question')(config);
   
@@ -20,11 +21,12 @@ exports.testCreate = function(beforeExit) {
       });
       
   responseFilePath = 'static/hit_create_response.xml';
-  mockHttpRequest(
-    'http://mechanicalturk.amazonaws.com/&HITTypeId=1&LifetimeInSeconds=1200&Service=AWSMechanicalTurkRequester&Operation=CreateHIT',
-    __dirname + '/../static/hit_create_response.xml');
-    
-
+  
+  var scope = nock('http://mechanicalturk.amazonaws.com')
+                .filteringRequestBody(filterBody)
+                .post('/', 'HITTypeId=1&LifetimeInSeconds=1200&Service=AWSMechanicalTurkRequester&Operation=CreateHIT')
+                .replyWithFile(200, __dirname + '/../static/hit_create_response.xml');
+  
   HIT.create(1, question, 1200, undefined, function(err, hit) {
     assert.ok(! calledback);
     calledback = true;
@@ -40,6 +42,7 @@ exports.testCreate = function(beforeExit) {
   });
 
   beforeExit(function() {
+    scope.done();
     assert.ok(calledback);
   });
 };
@@ -53,9 +56,10 @@ exports.testCreateWithErrors = function(beforeExit) {
       }
     });
   
-  mockHttpRequest(
-    'http://mechanicalturk.amazonaws.com/&HITTypeId=1&LifetimeInSeconds=1300&Service=AWSMechanicalTurkRequester&Operation=CreateHIT',
-    __dirname + '/../static/hit_create_response_error.xml');
+  var scope = nock('http://mechanicalturk.amazonaws.com')
+                .filteringRequestBody(filterBody)
+                .post('/', 'HITTypeId=1&LifetimeInSeconds=1300&Service=AWSMechanicalTurkRequester&Operation=CreateHIT')
+                .replyWithFile(200, __dirname + '/../static/hit_create_response_error.xml');
 
   HIT.create(1, question, 1300, undefined, function(errors, hit) {
     assert.ok(! calledback);
@@ -66,6 +70,7 @@ exports.testCreateWithErrors = function(beforeExit) {
   });
 
   beforeExit(function() {
+    scope.done();
     assert.ok(calledback);
   });
 }
@@ -79,9 +84,10 @@ exports.testCreateInvalid = function(beforeExit) {
         }
       });
 
-  mockHttpRequest(
-    'http://mechanicalturk.amazonaws.com/&HITTypeId=1&LifetimeInSeconds=1400&Service=AWSMechanicalTurkRequester&Operation=CreateHIT',
-    __dirname + '/../static/hit_create_response_invalid.xml');
+  var scope = nock('http://mechanicalturk.amazonaws.com')
+                .filteringRequestBody(filterBody)
+                .post('/', 'HITTypeId=1&LifetimeInSeconds=1400&Service=AWSMechanicalTurkRequester&Operation=CreateHIT')
+                .replyWithFile(200, __dirname + '/../static/hit_create_response_invalid.xml');
 
   HIT.create(1, question, 1400, undefined, function(errors, hit) {
     assert.ok(! calledback);
@@ -99,9 +105,12 @@ exports.testCreateInvalid = function(beforeExit) {
 exports.testGetValid = function(beforeExit) {
   var calledback = false;
 
-  mockHttpRequest(
-    'http://mechanicalturk.amazonaws.com/&HITId=ZZRZPTY4ERDZWJ868JCZ&Service=AWSMechanicalTurkRequester&Operation=GetHIT',
-    __dirname + '/../static/hit_get_response.xml');
+
+  var scope = nock('http://mechanicalturk.amazonaws.com')
+                .filteringRequestBody(filterBody)
+                .filteringPath(filterBody)
+                .get('/?HITId=ZZRZPTY4ERDZWJ868JCZ&Service=AWSMechanicalTurkRequester&Operation=GetHIT')
+                .replyWithFile(200, __dirname + '/../static/hit_get_response.xml');
 
   HIT.get('ZZRZPTY4ERDZWJ868JCZ', function(err, hit) {
     assert.ok(! calledback);
@@ -151,16 +160,19 @@ exports.testGetValid = function(beforeExit) {
   });
 
   beforeExit(function() {
+    scope.done();
     assert.ok(calledback);
   });
 };
 
 exports.testGetReviewableSingleResponse = function(beforeExit) {
   var calledback = false;
-  
-  mockHttpRequest(
-    'http://mechanicalturk.amazonaws.com/&Service=AWSMechanicalTurkRequester&Operation=GetReviewableHITs',
-    __dirname + '/../static/hit_getRevieweable_single_response.xml');
+
+  var scope = nock('http://mechanicalturk.amazonaws.com')
+                .filteringRequestBody(filterBody)
+                .filteringPath(filterBody)
+                .get('/&Service=AWSMechanicalTurkRequester&Operation=GetReviewableHITs')
+                .replyWithFile(200, __dirname + '/../static/hit_getRevieweable_single_response.xml');
   
   HIT.getReviewable(undefined, function(err, numResults, totalNumResults, pageNumber, hits) {
     calledback = true;
@@ -175,6 +187,7 @@ exports.testGetReviewableSingleResponse = function(beforeExit) {
   });
   
   beforeExit(function() {
+    scope.done();
     assert.ok(calledback);
   });
 };
@@ -182,9 +195,11 @@ exports.testGetReviewableSingleResponse = function(beforeExit) {
 exports.testGetReviewableMultipleResponse = function(beforeExit) {
   var calledback = false;
   
-  mockHttpRequest(
-    'http://mechanicalturk.amazonaws.com/&HitTypeId=ABCDEF&Service=AWSMechanicalTurkRequester&Operation=GetReviewableHITs',
-    __dirname + '/../static/hit_getRevieweable_multiple_response.xml');
+  var scope = nock('http://mechanicalturk.amazonaws.com')
+                .filteringRequestBody(filterBody)
+                .filteringPath(filterBody)
+                .get('/?HitTypeId=ABCDEF&Service=AWSMechanicalTurkRequester&Operation=GetReviewableHITs')
+                .replyWithFile(200, __dirname + '/../static/hit_getRevieweable_multiple_response.xml');
 
   HIT.getReviewable({hitTypeId: 'ABCDEF'}, function(err, numResults, totalNumResults, pageNumber, hits) {
     assert.ok(! calledback);
@@ -238,6 +253,7 @@ exports.testGetReviewableMultipleResponse = function(beforeExit) {
   });
   
   beforeExit(function() {
+    scope.done();
     assert.ok(calledback);
   });
 };

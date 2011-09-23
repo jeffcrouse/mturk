@@ -6,7 +6,8 @@ var config = {
   , secretAccessKey: "fksdlfkjsdlkfjsdlfkjslkfjsdlkfjsdlkfjsdlfkj"
 }
   , assert  = require('assert')
-  , mockHttpRequest = require('../mock_http_request')
+  , nock        = require('nock')
+  , filterBody  = require('../filterBody')
   , request = require('../../lib/request')(config);
 
 var status;
@@ -15,10 +16,11 @@ exports.testSuccessfulRequest = function(beforeExit) {
   var calledback = false;
   encoding = undefined;
 
-  mockHttpRequest(
-    'http://mechanicalturk.amazonaws.com/&ParamA=ValueA&ParamB=ValueB&Service=ServiceA&Operation=GetHIT',
-    __dirname + '/../static/test.xml',
-    200);
+  var scope = nock('http://mechanicalturk.amazonaws.com')
+                .filteringRequestBody(filterBody)
+                .filteringPath(filterBody)
+                .get('/?ParamA=ValueA&ParamB=ValueB&Service=ServiceA&Operation=GetHIT')
+                .replyWithFile(200, __dirname + '/../static/test.xml');
 
   request('ServiceA', 'GetHIT', 'GET', { 'ParamA': 'ValueA', 'ParamB': 'ValueB'}, function(err, decodedBody) {
     if (calledback) { throw new Error('Called back more than once'); }
@@ -37,6 +39,7 @@ exports.testSuccessfulRequest = function(beforeExit) {
   });
 
   beforeExit(function() {
+    scope.done();
     assert.ok(calledback);
   });
 };
@@ -44,10 +47,11 @@ exports.testSuccessfulRequest = function(beforeExit) {
 exports.testStatusError = function(beforeExit) {
   var calledback = false;
 
-  mockHttpRequest(
-    'http://mechanicalturk.amazonaws.com/&ParamB=ValueB&ParamC=ValueC&Service=ServiceA&Operation=GetHIT',
-    __dirname + '/../static/test.xml',
-    500);
+  var scope = nock('http://mechanicalturk.amazonaws.com')
+                .filteringRequestBody(filterBody)
+                .filteringPath(filterBody)
+                .get('/?ParamB=ValueB&ParamC=ValueC&Service=ServiceA&Operation=GetHIT')
+                .replyWithFile(500, __dirname + '/../static/test.xml');
 
   request('ServiceA', 'GetHIT', 'GET', { 'ParamB': 'ValueB', 'ParamC': 'ValueC'}, function(err, decodedBody) {
     if (calledback) { throw new Error('Called back more than once'); }
@@ -56,6 +60,7 @@ exports.testStatusError = function(beforeExit) {
   });
 
   beforeExit(function() {
+    scope.done();
     assert.ok(calledback);
   });
 };
@@ -63,9 +68,11 @@ exports.testStatusError = function(beforeExit) {
 exports.testAppError = function(beforeExit) {
   var calledback = false;
 
-  mockHttpRequest(
-    'http://mechanicalturk.amazonaws.com/&ParamD=ValueD&ParamE=ValueE&Service=ServiceA&Operation=GetHIT',
-    __dirname + '/../static/test_error.xml');
+  var scope = nock('http://mechanicalturk.amazonaws.com')
+                .filteringRequestBody(filterBody)
+                .filteringPath(filterBody)
+                .get('/?ParamD=ValueD&ParamE=ValueE&Service=ServiceA&Operation=GetHIT')
+                .replyWithFile(200, __dirname + '/../static/test_error.xml');
 
   request('ServiceA', 'GetHIT', 'GET', { 'ParamD': 'ValueD', 'ParamE': 'ValueE'}, function(err, decodedBody) {
     if (calledback) { throw new Error('Called back more than once'); }
@@ -74,6 +81,7 @@ exports.testAppError = function(beforeExit) {
   });
 
   beforeExit(function() {
+    scope.done();
     assert.ok(calledback);
   });
 }

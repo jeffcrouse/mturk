@@ -5,9 +5,10 @@ var config = {
     }
   , secretAccessKey: "fksdlfkjsdlkfjsdlfkjslkfjsdlkfjsdlkfjsdlfkj"
 }
-  , mturk           = require('../../../mturk')(config)
-  , assert          = require('assert')
-  , mockHttpRequest = require('../mock_http_request');
+  , mturk       = require('../../../mturk')(config)
+  , nock        = require('nock')
+  , filterBody  = require('../filterBody')
+  , assert      = require('assert');
 
 module.exports.testEvents = function(beforeExit) {
   var count = 0;
@@ -26,18 +27,19 @@ module.exports.testEvents = function(beforeExit) {
     , '4GBHZVQX3EHXZ2AYDY2T0': true
   };
   
-  mockHttpRequest(
-      'http://mechanicalturk.amazonaws.com/&Status=Reviewable&PageSize=20&PageNumber=1&Service=AWSMechanicalTurkRequester&Operation=GetReviewableHITs'
-    , __dirname + '/../static/hit_getRevieweable_multiple_response.xml'
-  );
-  mockHttpRequest(
-      'http://mechanicalturk.amazonaws.com/&Status=Reviewable&PageSize=20&PageNumber=2&Service=AWSMechanicalTurkRequester&Operation=GetReviewableHITs'
-    , __dirname + '/../static/hit_getRevieweable_multiple_response_page2.xml'
-  );
-  mockHttpRequest(
-      'http://mechanicalturk.amazonaws.com/&Status=Reviewable&PageSize=20&PageNumber=3&Service=AWSMechanicalTurkRequester&Operation=GetReviewableHITs'
-    , __dirname + '/../static/hit_getRevieweable_multiple_response_page3.xml'
-  );
+  var scope = nock('http://mechanicalturk.amazonaws.com')
+                .filteringPath(filterBody)
+                .filteringRequestBody(filterBody)
+                
+                .get('/?Status=Reviewable&PageSize=20&PageNumber=1&Service=AWSMechanicalTurkRequester&Operation=GetReviewableHITs')
+                .replyWithFile(200, __dirname + '/../static/hit_getRevieweable_multiple_response.xml')
+                
+                .get('/?Status=Reviewable&PageSize=20&PageNumber=2&Service=AWSMechanicalTurkRequester&Operation=GetReviewableHITs')
+                .replyWithFile(200, __dirname + '/../static/hit_getRevieweable_multiple_response_page2.xml')
+                
+                .get('/?Status=Reviewable&PageSize=20&PageNumber=3&Service=AWSMechanicalTurkRequester&Operation=GetReviewableHITs')
+                .replyWithFile(200, __dirname + '/../static/hit_getRevieweable_multiple_response_page3.xml');
+  
   mturk.on('HITReviewable', function(hitId) {
     assert.ok(!! expectedHits[hitId]);
     delete expectedHits[hitId];
@@ -50,6 +52,7 @@ module.exports.testEvents = function(beforeExit) {
   }, 1000);
   
   beforeExit(function() {
+    scope.done();
     assert.ok(finished);
     assert.ok(Object.keys(expectedHits).length === 0);
   });
