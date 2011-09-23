@@ -10,6 +10,8 @@
     , "winston": "0.3.3"
     , "underscore": "1.1.7"
     , "sax": "0.2.3"
-    , "nock": "0.1.x"
+  }
+  , "devDependencies": {
+      "nock": "0.1.x"
   }
 }
