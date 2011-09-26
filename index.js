@@ -7,7 +7,7 @@ module.exports = function(conf) {
 
   POLLER_INTERVAL_MS = 10000;
   
-  uri.setBaseURI(config.url ||  "http://mechanicalturk.amazonaws.com")
+  uri.setBaseURI(conf.url ||  "http://mechanicalturk.amazonaws.com")
 
   var notification = new EventEmitter();
 
