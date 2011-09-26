@@ -1,8 +1,9 @@
 var config = {
-    receptor: {
-        port: 8080
-      , host: undefined
-    }
+    url: "http://mechanicalturk.sandbox.amazonaws.com"
+    , receptor: {
+          port: 8080
+        , host: undefined
+      }
     , accessKeyId: "0CX5223E4BXJ1D41NG02"
     , secretAccessKey: "eXwzzT2CTVVfF/wiOOrwezR8inI5W/vP1mlfGEXx"
 }
@@ -13,7 +14,7 @@ var config = {
   , Price    = require('../../model/price')(config)
   , Question = require('../../model/question')(config)
 
-uri.setBaseURI('http://mechanicalturk.sandbox.amazonaws.com');
+uri.setBaseURI(config.url);
 
 exports.testCreateHITTypeAndGetReviewable = function(beforeExit) {
   var finished = false;
