@@ -11,7 +11,7 @@ var config = {
   , HITType  = require('../../model/hit_type')(config)
   , HIT      = require('../../model/hit')(config)
   , Price    = require('../../model/price')(config)
-  , Question = require('../../model/question')(config);
+  , Question = require('../../model/question')(config)
 
 uri.setBaseURI('http://mechanicalturk.sandbox.amazonaws.com');
 

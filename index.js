@@ -2,9 +2,12 @@ module.exports = function(conf) {
   var EventEmitter         = require('events').EventEmitter
     , notificationReceptor = require('./notification_receptor')(conf)
     , HIT                  = require('./model/hit')(conf)
+    , uri                  = require('./lib/uri')
     , ret;
 
   POLLER_INTERVAL_MS = 10000;
+  
+  uri.setBaseURI(config.url ||  "http://mechanicalturk.amazonaws.com")
 
   var notification = new EventEmitter();
 
