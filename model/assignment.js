@@ -1,19 +1,36 @@
+var xml          = require('../lib/xml-native')
+    EventEmitter = require('events').EventEmitter;
+
 module.exports = function(config) {
   var request    = require('../lib/request')(config)
     , inherits   = require('util').inherits
     , Base       = require('./base')
-    , ret        = {};
+    , ret;
 
   function Assignment() {
   }
+  
 
   inherits(Assignment, Base);
 
+  ret = Assignment;
+
   Assignment.prototype.populateFromResponse = function(response) {
+    var self = this
+      , rs;
+    
     Base.prototype.populateFromResponse.call(this, response, {
         AssignmentId: 'id'
       , HITId: 'hitId'
     });
+    if (this.answer) {
+      rs = new EventEmitter();
+      xml.decodeReadStream(rs, function(err, root) {
+        self.answer = root;
+      });
+      rs.emit('data', this.answer);
+      rs.emit('end');
+    }
   };
 
   /*
