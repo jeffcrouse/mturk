@@ -255,7 +255,7 @@ module.exports = function(config) {
    * 
    */
   HIT.prototype.getAssignments = function(options, callback) {
-    return getAssignments(this.id, options, callback);
+    return ret.getAssignments(this.id, options, callback);
   };
   
   return ret;
