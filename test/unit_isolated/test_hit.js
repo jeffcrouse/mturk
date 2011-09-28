@@ -155,6 +155,7 @@ exports.testGetValid = function(beforeExit) {
       , "assignmentDurationInSeconds":"30"
       , "numberOfSimilarHITs":"1"
       , "hitReviewStatus":"NotReviewed"
+      , "requesterAnnotation": {"path":"/r_pedro_2eteixeira_40gmail_2ecom/fbf83626c1e8e8ce7a27c943b30097a8"}
     };
     assert.eql(should, hit);
   });

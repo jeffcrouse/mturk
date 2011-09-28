@@ -5,7 +5,7 @@ module.exports = function(conf) {
     , uri                  = require('./lib/uri')
     , ret;
 
-  POLLER_INTERVAL_MS = conf.poller && conf.poller.frequency_ms || 60000;
+  var POLLER_INTERVAL_MS = conf.poller && conf.poller.frequency_ms || 60000;
   
   uri.setBaseURI(conf.url ||  "http://mechanicalturk.amazonaws.com")
 
@@ -21,14 +21,12 @@ module.exports = function(conf) {
       , timeout;
     if (! recentlyReviewed[hitId]) {
       recentlyReviewed[hitId] = true;
-      if (emitAny) notification.emit('any', {EventType: 'HITReviewable', HITId: hitId, eventType: 'hITReviewable'});
+      if (emitAny) { notification.emit('any', {EventType: 'HITReviewable', HITId: hitId, eventType: 'hITReviewable'}); }
       notification.emit('HITReviewable', hitId);
       // eventually delete hitId from list so it doesn't grow too much
       timeout = setTimeout(function() {
         var pos = clearTimeouts.lastIndexOf(timeout);
-        if (pos >= 0) {
-          clearTimeouts.splice(pos, 1);
-        }
+        if (pos >= 0) { clearTimeouts.splice(pos, 1); }
         delete recentlyReviewed[hitId];
       }, POLLER_INTERVAL_MS * 10);
       clearTimeouts.push(timeout);

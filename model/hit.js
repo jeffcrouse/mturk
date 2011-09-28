@@ -37,6 +37,9 @@ module.exports = function(config) {
       , HITStatus: 'hitStatus'
       , HITReviewStatus: 'hitReviewStatus'
     });
+    if (this.requesterAnnotation) {
+      this.requesterAnnotation = JSON.parse(this.requesterAnnotation);
+    }
   };
 
   HIT.prototype.create = function(callback) {

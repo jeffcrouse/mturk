@@ -43,5 +43,6 @@
     <AssignmentDurationInSeconds>30</AssignmentDurationInSeconds>
     <NumberOfSimilarHITs>1</NumberOfSimilarHITs>
     <HITReviewStatus>NotReviewed</HITReviewStatus>
+    <RequesterAnnotation>{"path":"/r_pedro_2eteixeira_40gmail_2ecom/fbf83626c1e8e8ce7a27c943b30097a8"}</RequesterAnnotation>
   </HIT>
 </GetHITResponse>
