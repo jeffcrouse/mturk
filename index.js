@@ -5,7 +5,7 @@ module.exports = function(conf) {
     , uri                  = require('./lib/uri')
     , ret;
 
-  POLLER_INTERVAL_MS = 10000;
+  POLLER_INTERVAL_MS = conf.poller && conf.poller.frequency_ms || 60000;
   
   uri.setBaseURI(conf.url ||  "http://mechanicalturk.amazonaws.com")
 
