@@ -230,7 +230,11 @@ module.exports = function(config) {
      totalNumResults = parseInt(response.GetAssignmentsForHITResult.TotalNumResults, 10);
 
      resultAssignments = response.GetAssignmentsForHITResult.Assignment;
-     if (! Array.isArray(resultAssignments)) resultAssignments = [resultAssignments];
+     if (resultAssignments === undefined) {
+       resultAssignments = [];
+     } else {
+       if (! Array.isArray(resultAssignments)) resultAssignments = [resultAssignments];
+     }
 
      assignments = resultAssignments.map(function(resultAssignment) {
        var assignment = new Assignment();
