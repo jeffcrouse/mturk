@@ -91,7 +91,7 @@ module.exports = function(config) {
    * 
    */
   Assignment.prototype.reject = function(requesterFeedback, callback) {
-    return reject(this.id, requesterFeedback, callback);
+    return ret.reject(this.id, requesterFeedback, callback);
   };
   
   return ret;
