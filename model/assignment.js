@@ -60,7 +60,7 @@ module.exports = function(config) {
    * 
    */
   Assignment.prototype.approve = function(requesterFeedback, callback) {
-    return approve(this.id, requesterFeedback, callback);
+    return ret.approve(this.id, requesterFeedback, callback);
   };
 
 
