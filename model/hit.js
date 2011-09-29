@@ -204,19 +204,17 @@ module.exports = function(config) {
    */
 
   ret.getAssignments = function getAssignments(hitId, options, callback) {
-   var options = {
-       HITId: hitId
-   };
+    var inOptions = {}
+    if (!options) options = {};
+    inOptions.HITId = hitId;
 
-   if (!options) options = {};
+   if (options.assignmentStatus) inOptions.AssignmentStatus = options.assignmentStatus;
+   if (options.sortProperty) inOptions.SortProperty = options.sortProperty;
+   if (options.sortDirection) inOptions.SortDirection = options.sortProperty;
+   if (options.pageSize) inOptions.PageSize = options.pageSize;
+   if (options.pageNumber) inOptions.PageNumber = options.pageNumber;
 
-   if (options.assignmentStatus) options.AssignmentStatus = options.assignmentStatus;
-   if (options.sortProperty) options.SortProperty = options.sortProperty;
-   if (options.sortDirection) options.SortDirection = options.sortProperty;
-   if (options.pageSize) options.PageSize = options.pageSize;
-   if (options.pageNumber) options.PageNumber = options.pageNumber;
-
-   request('AWSMechanicalTurkRequester', 'GetAssignmentsForHIT', 'GET', options, function(err, response) {
+   request('AWSMechanicalTurkRequester', 'GetAssignmentsForHIT', 'GET', inOptions, function(err, response) {
      var numResults, pageNumber, totalNumResults, resultAssignments, assignments;
      if (err) { callback(err); return; }
 
