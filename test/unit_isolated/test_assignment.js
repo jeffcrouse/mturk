@@ -15,7 +15,7 @@ exports.testApprove = function(beforeExit) {
   
   var mturk = nock('http://mechanicalturk.amazonaws.com')
                 .filteringRequestBody(filterBody)
-                .post('/', 'assignmentId=abcdefghijklmnop123&RequesterFeedback=this%20is%20feedback%20from%20the%20requester&Service=AWSMechanicalTurkRequester&Operation=ApproveAssignment')
+                .post('/', 'AssignmentId=abcdefghijklmnop123&RequesterFeedback=this%20is%20feedback%20from%20the%20requester&Service=AWSMechanicalTurkRequester&Operation=ApproveAssignment')
                 .replyWithFile(200, __dirname + '/../static/assignment_approve_response.xml');
 
   Assignment.approve('abcdefghijklmnop123', 'this is feedback from the requester', function(err) {
@@ -58,7 +58,7 @@ exports.testReject = function(beforeExit) {
 
   var mturk = nock('http://mechanicalturk.amazonaws.com')
                 .filteringRequestBody(filterBody)
-                .post('/', 'assignmentId=abcdefghijklmnop123&RequesterFeedback=this%20is%20feedback%20from%20the%20requester&Service=AWSMechanicalTurkRequester&Operation=RejectAssignment')
+                .post('/', 'AssignmentId=abcdefghijklmnop123&RequesterFeedback=this%20is%20feedback%20from%20the%20requester&Service=AWSMechanicalTurkRequester&Operation=RejectAssignment')
                 .replyWithFile(200, __dirname + '/../static/assignment_reject_response.xml');
   
   Assignment.reject('abcdefghijklmnop123', 'this is feedback from the requester', function(err) {

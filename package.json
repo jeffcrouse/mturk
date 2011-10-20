@@ -1,15 +1,15 @@
 {
     "name": "expensecat-mturk"
-  , "version": "0.0.12"
+  , "version": "0.1.0"
   , "private": true
   , "dependencies": {
-      "request": "1.9.8"
-    , "validator": "0.2.6"
-    , "express": "2.3.12"
-    , "jade": "0.13.0"
-    , "winston": "0.3.3"
-    , "underscore": "1.1.7"
-    , "sax": "0.2.3"
+      "request": "2.1.x"
+    , "validator": "0.2.x"
+    , "express": "2.3.x"
+    , "jade": "0.13.x"
+    , "winston": "0.3.x"
+    , "underscore": "1.1.x"
+    , "sax": "0.2.x"
   }
   , "devDependencies": {
       "nock": "0.1.x"
