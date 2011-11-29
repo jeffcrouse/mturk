@@ -4,12 +4,11 @@ Amazon Mechanical Turk API wrapper for Node.
 
 # Install
 
-    npm install
+    npm install mturk
 
 # Use
 
-    var mturk = require('path/to/mturk');
-    mturk...
+    var mturk = require('mturk');
 
 Check [the API docs](https://github.com/expensecat/mturk/blob/master/API.md).
 
