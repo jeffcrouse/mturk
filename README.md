@@ -7,7 +7,7 @@
     var mturk = require('path/to/mturk');
     mturk...
 
-Check [the API docs](https://github.com/expensecat/expensecat/blob/master/mturk/API.md).
+Check [the API docs](https://github.com/expensecat/mturk/blob/master/API.md).
 
 # Tests
 
