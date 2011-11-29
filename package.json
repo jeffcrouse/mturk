@@ -1,7 +1,11 @@
 {
-    "name": "expensecat-mturk"
+    "name": "mturk"
+  , "description": "Amazon Mechanical Turk API wrapper for Node"
   , "version": "0.1.0"
-  , "private": true
+  , "authors": [
+    "Pedro Teixeira"
+  ]
+  , "keywords": ["Mechanical Turk", "Amazon", "API"]
   , "dependencies": {
       "request": "2.1.x"
     , "validator": "0.2.x"

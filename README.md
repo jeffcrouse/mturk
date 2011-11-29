@@ -1,3 +1,7 @@
+# Intro
+
+Amazon Mechanical Turk API wrapper for Node.
+
 # Install
 
     npm install
