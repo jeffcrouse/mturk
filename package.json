@@ -1,11 +1,15 @@
 {
     "name": "mturk"
   , "description": "Amazon Mechanical Turk API wrapper for Node"
-  , "version": "0.1.0"
-  , "authors": [
-    "Pedro Teixeira"
+  , "version": "0.1.1"
+  , "author": "Expense Cat"
+  , "repository" :
+    { "type" : "git"
+    , "url" : "http://github.com/expensecat/mturk.git"
+    }
+  , "contributors": [
+      {"name": "Pedro Teixeira", "email" : "pedro.teixeira@gmail.com"}
   ]
-  , "keywords": ["Mechanical Turk", "Amazon", "API"]
   , "dependencies": {
       "request": "2.1.x"
     , "validator": "0.2.x"
@@ -15,7 +19,9 @@
     , "underscore": "1.1.x"
     , "sax": "0.2.x"
   }
+  , "engines": { "node": ">=0.4.0"  }
   , "devDependencies": {
       "nock": "0.1.x"
   }
+  , "tags": ["Mechanical Turk", "Amazon", "API"]
 }
