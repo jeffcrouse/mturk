@@ -20,7 +20,7 @@ Listen to events: assignmentAccepted, assignmentAbandoned, assignmentReturned, a
 
 ## HITType
 
-    var HITType = require('../mturk').HITType;
+    var HITType = require('mturk').HITType;
 
 ### HITType.create(title, description, reward, assignmentDurationInSeconds, options, callback)
 
@@ -44,7 +44,7 @@ Sets the notification for a HITType. Essential when you want to be informed in "
 
 ## HIT
 
-    var HIT = require('../mturk').HIT;
+    var HIT = require('mturk').HIT;
 
 
 ### HIT.create(hitTypeId, question, lifeTimeInSeconds, options, callback)
@@ -108,7 +108,7 @@ Gets the assigments for a HIT
 
 ## Price
 
-    var Price = require('../mturk').Price;
+    var Price = require('mturk').Price;
     var amount = 0.15;
     var currencyCode = 'USD';
     var price = new Price(amount, currencyCode);
@@ -159,7 +159,7 @@ The main "mturk" module is an EventEmitter that you can set up to listen to the 
 
 Example:
 
-    var mturk = require('../mturk');
+    var mturk = require('mturk');
     mturk.on('HITReviewable', function(hitId) {
       console.log('HIT with ID ' + hitId + ' is now reviewable.');
     });
