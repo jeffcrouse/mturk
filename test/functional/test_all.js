@@ -1,11 +1,13 @@
+var aws_creds = require('./aws_creds.js');
+
 var config = {
     url: "http://mechanicalturk.sandbox.amazonaws.com"
     , receptor: {
           port: 8080
         , host: undefined
       }
-    , accessKeyId: "0CX5223E4BXJ1D41NG02"
-    , secretAccessKey: "eXwzzT2CTVVfF/wiOOrwezR8inI5W/vP1mlfGEXx"
+    , accessKeyId: aws_creds.accessKeyId
+    , secretAccessKey: aws_creds.secretAccessKey
 }
   , assert   = require('assert')
   , uri      = require('../../lib/uri')
@@ -16,7 +18,7 @@ var config = {
 
 uri.setBaseURI(config.url);
 
-exports.testCreateHITTypeAndGetReviewable = function(beforeExit) {
+exports.testCreateHITTypeAndSearchAndExpireAndDispose = function(beforeExit) {
   var finished = false;
   
   var reward = new Price(0.1, 'USD');
@@ -41,15 +43,39 @@ exports.testCreateHITTypeAndGetReviewable = function(beforeExit) {
       assert.isNotNull(hit.id);
       
       HIT.get(hit.id, function(err, gotHit) {
-        finished = true;
         assert.isNull(err);
         assert.isNotNull(gotHit);
         assert.isNotNull(gotHit.id);
         assert.eql(hit.id, gotHit.id);
+        
+        HIT.search(undefined, function(err, numResults, totalNumResults, pageNumber, hits) {
+          assert.isNull(err);
+          assert.isNotNull(numResults);
+          assert.isNotNull(totalNumResults);
+          assert.isNotNull(pageNumber);
+          assert.isNotNull(hits);
+          var found = false;
+          hits.forEach(function(searcHit) {
+            if (searcHit.id === hit.id) found = true;
+          });
+          
+          assert.ok(found);
+          
+          HIT.expire(gotHit.id, function(err) {
+            assert.isNull(err);
+            HIT.dispose(gotHit.id, function(err) {
+              assert.isNull(err);
+              HIT.get(hit.id, function(err, disposedHit) {
+                assert.isNull(err);
+                assert.isNotNull(disposedHit);
+                assert.eql('Disposed', disposedHit.hitStatus);
+                finished = true;
+              });
+            })
+          })          
+        });        
       });
-
     });
-
   });
 
   beforeExit(function() {
