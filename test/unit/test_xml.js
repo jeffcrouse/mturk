@@ -1,6 +1,6 @@
 var assert = require('assert');
 var fs  = require('fs')
-  , xml = require('../../lib/xml');
+  , xml = require('../../lib/xml-native');
 
 exports.testDecodeReadStream = function(beforeExit) {
   var rs  = fs.createReadStream(__dirname + '/../static/test.xml')
