@@ -82,7 +82,7 @@ module.exports = function(config) {
    * @param {options.maxAssignments} the maximum number of assignments. defaults to 1 (int). Optional.
    * @param {options.requesterAnnotation} annotations only viewable by the requester (you). (string with max 255 chars). Optional.
    * @param {callback} function with signature (Array errors || null, HIT hit)
-   * 
+   *
    */
   ret.create = function(hitTypeId, question, lifeTimeInSeconds, options, callback) {
     if (! options) options = {}
@@ -97,11 +97,114 @@ module.exports = function(config) {
   };
 
   /*
+   * force expire a HIT
+   *
+   * @param {hitId} the ID of the HIT to expire
+   * @param {callback} function with signature (Error error || null)
+   *
+   */
+   ret.expire = function(hitId, callback) {
+     var self = this;
+
+     request('AWSMechanicalTurkRequester', 'ForceExpireHIT', 'GET', { HITId: hitId}, function(err, response) {
+       if (err) { callback(err); return; }
+
+       if (! HIT.prototype.nodeExists(['ForceExpireHITResult', 'Request', 'IsValid'], response)) { callback([new Error('No "ForceExpireHITResult > Request > IsValid" node on the response')]); return; }
+       if (response.ForceExpireHITResult.Request.IsValid.toLowerCase() != 'true') {
+         callback([new Error('Response says ForceExpireHITResult is invalid')]);
+         return;
+       }
+
+       callback(err);
+     })
+   }
+
+  /*
+   * dispose of a HIT
+   *
+   * @param {hitId} the ID of the HIT to dispose of
+   * @param {callback} function with signature (Error error || null)
+   *
+   */
+  ret.dispose = function(hitId, callback) {
+    var self = this;
+
+    request('AWSMechanicalTurkRequester', 'DisposeHIT', 'GET', { HITId: hitId }, function(err, response) {
+      if (err) { callback(err); return; }
+
+      if (! HIT.prototype.nodeExists(['DisposeHITResult', 'Request', 'IsValid'], response)) { callback([new Error('No "DisposeHITResult > Request > IsValid" node on the response')]); return; }
+      if (response.DisposeHITResult.Request.IsValid.toLowerCase() != 'true') {
+        callback([new Error('Response says DisposeHITResult is invalid')]);
+        return;
+      }
+
+      callback(err);
+    });
+  }
+
+  /*
+   * Retrieves all HITs
+   *
+   * @param {options.sortProperty} can sort by title | reward | expiration | creationTime. Defaults to "expiration"
+   * @param {options.sortDirection} can sort by Title | Reward | Expiration | CreationTime. Defaults to "Expiration"
+   * @param {options.pageSize} The number of HITs to include in a page of results (int). Defaults to 10. Maximum is 100
+   * @param {options.pageNumber} The page of results to return (int). Defaults to 1
+   * @param {callback} function with signature (error, int numResults, int totalNumResults, int pageNumber, Array HITs)
+   *
+   */
+   ret.search = function(options, callback) {
+     if (! options) options = {};
+     var requestOptions = {
+         SortDirection: options.sortDirection
+       , PageSize     : options.pageSize
+       , PageNumber   : options.pageNumber
+     };
+     if (options.sortProperty) requestOptions.SortProperty = Base.objectKeyToResponseKey(options.sortProperty);
+
+
+     request('AWSMechanicalTurkRequester', 'SearchHITs', 'GET', requestOptions, function(err, response) {
+       var responseHits
+         , hits = [];
+
+       if (err) { callback(err); return; }
+
+       if (! HIT.prototype.nodeExists(['SearchHITsResult', 'Request', 'IsValid'], response)) { callback([new Error('No "SearchHITsResult > Request > IsValid" node on the response')]); return; }
+       if (response.SearchHITsResult.Request.IsValid.toLowerCase() != 'true') {
+         callback([new Error('Response says SearchHITsResult request is invalid')]);
+         return;
+       }
+       delete response.SearchHITsResult.Request;
+
+       if (! HIT.prototype.nodeExists(['SearchHITsResult', 'NumResults'], response)) { callback([new Error('No "SearchHITsResult > NumResults" node on the response')]); return; }
+       var numResults = parseInt(response.SearchHITsResult.NumResults, 10);
+
+       if (! HIT.prototype.nodeExists(['SearchHITsResult', 'TotalNumResults'], response)) { callback([new Error('No "SearchHITsResult > TotalNumResults" node on the response')]); return; }
+       var totalNumResults = parseInt(response.SearchHITsResult.TotalNumResults, 10);
+
+       if (! HIT.prototype.nodeExists(['SearchHITsResult', 'PageNumber'], response)) { callback([new Error('No "SearchHITsResult > PageNumber" node on the response')]); return; }
+       var pageNumber = parseInt(response.SearchHITsResult.PageNumber, 10);
+       
+       if (! err) {
+         responseHits = response.SearchHITsResult.HIT;
+         if (responseHits) {
+           if (! Array.isArray(responseHits)) responseHits = [responseHits];
+           responseHits.forEach(function(responseHit) {
+             var hit = new HIT();
+             hit.populateFromResponse(responseHit);
+             hits.push(hit);
+           });
+         }
+       }
+       callback(err, numResults, totalNumResults, pageNumber, hits);       
+     });
+   };
+
+  /*
    * Retrieves the details of the specified HIT.
    *
    * @param {hitId} The ID of the HIT to retrieve (String)
    * @param {callback} function with signature (Error error || null, HIT hit)
-   * 
+   *
    */
   ret.get = function(hitId, callback) {
     var self = this;
@@ -123,7 +226,7 @@ module.exports = function(config) {
         hit.populateFromResponse(response.HIT);
       }
       callback(err, hit);
-    }); 
+    });
   };
 
 
@@ -136,8 +239,8 @@ module.exports = function(config) {
    * @param {options.sortDirection} can sort by Title | Reward | Expiration | CreationTime. Defaults to "Expiration"
    * @param {options.pageSize} The number of HITs to include in a page of results (int). Defaults to 10. Maximum is 100
    * @param {options.pageNumber} The page of results to return (int). Defaults to 1
-   * @param {callback} function with signature (error, int numResults, int totalNumResults, int pageNumber, Array hITs)
-   * 
+   * @param {callback} function with signature (error, int numResults, int totalNumResults, int pageNumber, Array HITs)
+   *
    */
   ret.getReviewable = function(options, callback) {
     if (! options) options = {};
@@ -200,7 +303,7 @@ module.exports = function(config) {
    * @param {options.pageSize} The number of assignments to include in a page of results (int). Default: 10
    * @param {options.pageNumber} The page of results to return (int). Default: 1
    * @param {callback} function with signature (error, int numResults, int totalNumResults, int pageNumber, Array assignments)
-   * 
+   *
    */
 
   ret.getAssignments = function getAssignments(hitId, options, callback) {
@@ -254,11 +357,11 @@ module.exports = function(config) {
    * @param {options.pageSize} The number of assignments to include in a page of results (int). Default: 10
    * @param {options.pageNumber} The page of results to return (int). Default: 1
    * @param {callback} function with signature (error, int numResults, int totalNumResults, int pageNumber, Array assignments)
-   * 
+   *
    */
   HIT.prototype.getAssignments = function(options, callback) {
     return ret.getAssignments(this.id, options, callback);
   };
-  
+
   return ret;
 };
