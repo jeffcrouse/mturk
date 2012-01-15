@@ -129,7 +129,7 @@ module.exports = function(conf) {
    * 
    */
   HITType.prototype.setNotification = function(notification, active, callback) {
-    setNotification(this.id, notification, active, callback);
+    ret.setNotification(this.id, notification, active, callback);
   };
   
   return ret;
