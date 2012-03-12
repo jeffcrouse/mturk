@@ -43,12 +43,14 @@ module.exports = function(config) {
   };
 
   HIT.prototype.create = function(callback) {
-    var self = this;
+    var self = this,
+        calledback = false;
 
-    if (! this.valid()) { callback(this.errors); return; }
+    if (! this.valid()) { return callback(this.errors); }
 
     this.question.load(function(err, questionFormXML) {
-      if (err) {callback(err); return; }
+      if (err) {return callback(err); }
+      if (! questionFormXML) { return callback(new Error('question load returned empty form XML')); }
       var remoteErrors
         , options = {
             HITTypeId: self.hitTypeId
@@ -59,10 +61,10 @@ module.exports = function(config) {
       if (self.requesterAnnotation) options.RequesterAnnotation =  self.requesterAnnotation;
 
       request('AWSMechanicalTurkRequester', 'CreateHIT', 'POST', options, function(err, response) {
-        if (err) { callback([err]); return; }
+        if (err) { return callback([err]); }
 
         remoteErrors = self.remoteRequestValidationError(response.HIT);
-        if (remoteErrors) { callback(remoteErrors.map(function(error) { return new Error(error); })); return; }
+        if (remoteErrors) { return callback(remoteErrors.map(function(error) { return new Error(error); })); }
         delete response.HIT.Request;
 
         self.populateFromResponse(response.HIT);
