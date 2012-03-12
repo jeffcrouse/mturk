@@ -16,8 +16,10 @@ module.exports = function(conf) {
   };
 
   Question.prototype.load = function(callback) {
-    var self = this;
-    jade.renderFile(this.templateFilePath, { locals: this.options }, callback);
+    var self = this,
+        calledback = false;
+    
+    jade.renderFile(this.templateFilePath, this.options, callback);
   };
   
   return ret;

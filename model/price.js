@@ -16,7 +16,7 @@ module.exports = function(conf) {
     v.check(this.amount, 'Please provide a valid amount').notNull();
     v.check(this.amount, 'Please provide a valid amount').isFloat();
     v.check(this.currencyCode, 'Please provide a currency code').notNull();
-    v.check(this.currencyCode, 'Please provide a valid currency code: ' + JSON.stringify(SUPPORTED_CURRENCIES)).in(SUPPORTED_CURRENCIES);
+    v.check(this.currencyCode, 'Please provide a valid currency code: ' + JSON.stringify(SUPPORTED_CURRENCIES)).isIn(SUPPORTED_CURRENCIES);
   };
   
   return ret;
