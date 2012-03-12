@@ -9,7 +9,7 @@ var config = {
   , assert       = require('assert');
 
 exports.testValidation = function() {
-  assert.ok(notification.build('http://test.com', 'REST', ['HITExpired', 'HITReviewable']).valid());
+  assert.ok(  notification.build('http://test.com', 'REST', ['HITExpired', 'HITReviewable']).valid());
   assert.ok(! notification.build(null, 'REST', ['HITExpired', 'HITReviewable']).valid());
   assert.ok(! notification.build('http://test.com', null, ['HITExpired', 'HITReviewable']).valid());
   assert.ok(! notification.build('http://test.com', 'zREST', ['HITExpired', 'HITReviewable']).valid());

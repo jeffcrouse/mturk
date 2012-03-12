@@ -23,14 +23,17 @@ module.exports = function(conf) {
 
   Notification.prototype.validate = function(v) {
     v.check(this.destination, 'Please provide a destination').notNull();
-    v.check(this.transport, 'Please provide a valid transport').in(['Email', 'SOAP', 'REST']);
+    v.check(this.transport, 'Please provide a valid transport').isIn(['Email', 'SOAP', 'REST']);
     v.check(this.eventType, 'Please provide the event types').notNull();
     if (! Array.isArray(this.eventType)) {
       v.error('eventTypes argument should be array');
     } else {
-      this.eventType.forEach(function(eventType) {
-        v.check(eventType, 'Event type is not in ' + JSON.stringify(SUPPORTED_EVENT_TYPES)).in(SUPPORTED_EVENT_TYPES);
-      });
+      if (this.eventType.length === 0) { v.error('event type array should have at least one element'); }
+      else {
+        this.eventType.forEach(function(eventType) {
+          v.check(eventType, 'Event type is not in ' + JSON.stringify(SUPPORTED_EVENT_TYPES)).isIn(SUPPORTED_EVENT_TYPES);
+        });
+      }
     }
   };
 
