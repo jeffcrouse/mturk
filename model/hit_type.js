@@ -52,9 +52,9 @@ module.exports = function(conf) {
       , AssignmentDurationInSeconds: this.assignmentDurationInSeconds
     }
     if (this.keywords) options.Keywords = this.keywords;
-    if (this.autoApprovalDelayInSeconds) options.autoApprovalDelayInSeconds = this.autoApprovalDelayInSeconds;
+    if (this.autoApprovalDelayInSeconds) options.AutoApprovalDelayInSeconds = this.autoApprovalDelayInSeconds;
 
-    request('AWSMechanicalTurkRequester', 'RegisterHITType', 'POST', options, function(err, response) {
+    request('AWSMechanicalTurkRequester', 'RegisterHITType', 'POST', options, function(err, response) {	
       if (err) { callback([err]); return; }
 
       remoteErrors = self.remoteRequestValidationError(response.RegisterHITTypeResult);
