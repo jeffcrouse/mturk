@@ -30,9 +30,9 @@ Listen to events: assignmentAccepted, assignmentAbandoned, assignmentReturned, a
 
 - **url**: The base URL for all API calls.  Should be either 
   - https://mechanicalturk.sandbox.amazonaws.com
-    - For testing
-    - posts HITs to [worker sandbox](https://requestersandbox.mturk.com/)
-    - manage HITs at [requester sandbox](https://requestersandbox.mturk.com/)
+      - For testing
+      - posts HITs to [worker sandbox](https://requestersandbox.mturk.com/)
+      - manage HITs at [requester sandbox](https://requestersandbox.mturk.com/)
   - https://mechanicalturk.amazonaws.com
     - Posts HITs to [Mechanical Turk](https://www.mturk.com/mturk/)
 - **receptor**: Configure the express instance that will wait for notifications set up using *hitType.setNotification*
