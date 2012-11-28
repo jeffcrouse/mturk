@@ -91,7 +91,6 @@ module.exports = function(conf) {
   ret.HIT          = HIT;
   ret.HITType      = require('./model/hit_type')(conf);
   ret.Price        = require('./model/price')(conf);
-  ret.Question     = require('./model/question')(conf);
   ret.Notification = require('./model/notification')(conf);
   ret.Assignment   = require('./model/assignment')(conf);
   

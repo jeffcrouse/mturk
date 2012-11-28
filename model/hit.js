@@ -24,6 +24,7 @@ module.exports = function(config) {
     v.check(this.hitTypeId, 'Please enter a valid hitTypeId').notNull().isAlphanumeric();
     v.check(this.lifeTimeInSeconds, 'Please enter a lifeTimeInSeconds').notNull();
     v.check(this.lifeTimeInSeconds, 'Please enter a valid lifeTimeInSeconds').isInt();
+    v.check(this.question, 'Please provide a question').notNull();
     if (this.lifeTimeInSeconds < 30) { v.error("lifeTimeInSeconds should be >= 30");  }
     if (this.lifeTimeInSeconds > 31536000) { v.error("lifeTimeInSeconds should be <= 31536000");  }
     if (this.maxAssignments) { v.check(this.maxAssignments, 'maxAssignments should be an integer').isInt(); }
@@ -47,30 +48,25 @@ module.exports = function(config) {
         calledback = false;
 
     if (! this.valid()) { return callback(this.errors); }
+    var remoteErrors
+      , options = {
+          HITTypeId: self.hitTypeId
+        , Question: this.question
+        , LifetimeInSeconds: self.lifeTimeInSeconds
+      };
+    if (self.maxAssignments) options.MaxAssignments =  self.maxAssignments;
+    if (self.requesterAnnotation) options.RequesterAnnotation =  self.requesterAnnotation;
 
-    this.question.load(function(err, questionFormXML) {
-      if (err) {return callback(err); }
-      if (! questionFormXML) { return callback(new Error('question load returned empty form XML')); }
-      var remoteErrors
-        , options = {
-            HITTypeId: self.hitTypeId
-          , Question: questionFormXML
-          , LifetimeInSeconds: self.lifeTimeInSeconds
-        };
-      if (self.maxAssignments) options.MaxAssignments =  self.maxAssignments;
-      if (self.requesterAnnotation) options.RequesterAnnotation =  self.requesterAnnotation;
+    request('AWSMechanicalTurkRequester', 'CreateHIT', 'POST', options, function(err, response) {
+      if (err) { return callback([err]); }
 
-      request('AWSMechanicalTurkRequester', 'CreateHIT', 'POST', options, function(err, response) {
-        if (err) { return callback([err]); }
+      remoteErrors = self.remoteRequestValidationError(response.HIT);
+      if (remoteErrors) { return callback(remoteErrors.map(function(error) { return new Error(error); })); }
+      delete response.HIT.Request;
 
-        remoteErrors = self.remoteRequestValidationError(response.HIT);
-        if (remoteErrors) { return callback(remoteErrors.map(function(error) { return new Error(error); })); }
-        delete response.HIT.Request;
-
-        self.populateFromResponse(response.HIT);
-        if (err) { err = [err]; }
-        callback(err);
-      });
+      self.populateFromResponse(response.HIT);
+      if (err) { err = [err]; }
+      callback(err);
     });
   };
 
@@ -143,6 +139,31 @@ module.exports = function(config) {
       callback(err);
     });
   }
+
+  /*
+   * Disables specified HIT.
+   * 
+   * @param {hitId} The ID of the HIT to retrieve (String)
+   * @param {callback} function with signature (Error error || null, HIT hit)
+   *
+   */
+  ret.disable = function(hitId, callback) {
+    var self = this;
+
+    request('AWSMechanicalTurkRequester', 'DisableHIT', 'GET', { HITId: hitId }, function(err, response) {
+   
+      if (err) { callback(err); return; }
+
+      if (! HIT.prototype.nodeExists(['DisableHITResult', 'Request', 'IsValid'], response)) { callback([new Error('No "HIT > Request > IsValid" node on the response')]); return; }
+      if (response.DisableHITResult.Request.IsValid.toLowerCase() != 'true') {
+        callback([new Error('Response says HIT is invalid')]);
+        return;
+      }
+      delete response.DisableHITResult.Request;
+      callback(err);
+    });
+  };
+
 
   /*
    * Retrieves all HITs
