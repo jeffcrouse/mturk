@@ -4,7 +4,7 @@ module.exports = function(config) {
     , requestHandler  = require('./request_handler')
     , ret;
 
-  var receptor = express.createServer();
+  var receptor = express();
 
   receptor.use(receptor.router);
   receptor.use(express.errorHandler({ dumpExceptions: true, showStack: true }));
