@@ -92,37 +92,8 @@ Creates a HIT
 
 #### Note about *question*
 
-The question must be well-formed XML; either a [QuestionForm](http://docs.amazonwebservices.com/AWSMechTurk/latest/AWSMturkAPI/ApiReference_QuestionFormDataStructureArticle.html) file or an [ExternalQuestion](http://docs.amazonwebservices.com/AWSMechTurk/latest/AWSMturkAPI/ApiReference_ExternalQuestionArticle.html).  You can find the appropriate Schema URLs in the [WsdlLocationArticle](http://docs.amazonwebservices.com/AWSMechTurk/latest/AWSMturkAPI/ApiReference_WsdlLocationArticle.html)
-	
-	// 1. Create the HITType
-	var price = new Price("2.50", "USD");
-	var title = "Touch Your Toes";
-	var description = "Exercise is good for you!";
-	var duration = 60 * 10; // #seconds Worker has to complete after accepting
-	var options = { keywords: "fitness, health", autoApprovalDelayInSeconds: 3600 };
-	HITType.create(title, description, price, duration, options, function(err, hitType) {
+The question must be a well-formed XML string; either a [QuestionForm](http://docs.amazonwebservices.com/AWSMechTurk/latest/AWSMturkAPI/ApiReference_QuestionFormDataStructureArticle.html) file or an [ExternalQuestion](http://docs.amazonwebservices.com/AWSMechTurk/latest/AWSMturkAPI/ApiReference_ExternalQuestionArticle.html).  You can find the appropriate Schema URLs in the [WsdlLocationArticle](http://docs.amazonwebservices.com/AWSMechTurk/latest/AWSMturkAPI/ApiReference_WsdlLocationArticle.html).
 
-		// 2. Render the Question XML
-		var options = {'question': "What's your favorite color?"};
-		var templateFile = __dirname+"/questionform.xml.ejs";
-		ejs.renderFile(templateFile, options, function(err, questionXML) {
-			
-			// 3. Create a HIT
-			var options = {maxAssignments: 5}
-			var lifeTimeInSeconds = 3600; // 1 hour
-			HIT.create(hitType.id, questionXML, lifeTimeInSeconds, function(err, hit){
-				console.log("Created HIT "+hit.id);
-			});
-		});
-	});
-	
-	mturk.on('HITReviewable', function(hitId) {
-  		console.log('HIT with ID ' + hitId + ' HITReviewable');
-  		HIT.getAssignments(hitId, {}, function(err, numResults, totalNumResults, pageNumber, assignments) {
-    	assignments.forEach(function(assignment) {
-    		// review, then approve or decline
-    	});
-  	});
 
 ### HIT.get(hitId, callback)
 
@@ -214,6 +185,46 @@ Gets the assigments for a HIT
 
 Creates a new Price structure.
 
+
+## Example HIT Creation
+
+
+Here is an example of creating a HITType, then rendering a question XML string using EJS, and finally creating a HIT.
+	
+	// 1. Create the HITType
+	var price = new Price("2.50", "USD");
+	var title = "Touch Your Toes";
+	var description = "Exercise is good for you!";
+	var duration = 60 * 10; // #seconds Worker has to complete after accepting
+	var options = { keywords: "fitness, health", autoApprovalDelayInSeconds: 3600 };
+	HITType.create(title, description, price, duration, options, function(err, hitType) {
+		console.log("Created HITType "+hitType.id);
+		
+		// 2. Render the Question XML
+		var options = {'question': "What's your favorite color?"};
+		var templateFile = __dirname+"/views/questionForm.xml.ejs";
+		ejs.renderFile(templateFile, options, function(err, questionXML) {
+			console.log("Rendered XML: "+questionXML);
+			
+			// 3. Create a HIT
+			var options = {maxAssignments: 5}
+			var lifeTimeInSeconds = 3600; // 1 hour
+			HIT.create(hitType.id, questionXML, lifeTimeInSeconds, {}, function(err, hit){
+				console.log("Created HIT "+hit.id);
+			});
+		});
+	});
+
+Then, somewhere else:
+
+	mturk.on('HITReviewable', function(hitId) {
+	  console.log('HIT with ID ' + hitId + ' HITReviewable');
+	  HIT.getAssignments(hitId, {}, function(err, numResults, totalNumResults, pageNumber, assignments) {
+	    assignments.forEach(function(assignment) {
+	      // review, then approve or decline
+	    });
+	  });
+	});
 
 ## Notification
 

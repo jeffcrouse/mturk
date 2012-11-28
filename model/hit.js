@@ -51,7 +51,7 @@ module.exports = function(config) {
     var remoteErrors
       , options = {
           HITTypeId: self.hitTypeId
-        , Question: question
+        , Question: this.question
         , LifetimeInSeconds: self.lifeTimeInSeconds
       };
     if (self.maxAssignments) options.MaxAssignments =  self.maxAssignments;
