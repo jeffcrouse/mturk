@@ -38,7 +38,14 @@ module.exports = function(config) {
       , HITReviewStatus: 'hitReviewStatus'
     });
     if (this.requesterAnnotation) {
-      this.requesterAnnotation = JSON.parse(this.requesterAnnotation);
+      try {
+         this.requesterAnnotation = JSON.parse(this.requesterAnnotation);
+      }
+      catch (ex){
+          console.log("Error parsing requesterAnnotation:" + ex.message);
+          this.requesterAnnotation = null;
+      }
+
     }
   };
 

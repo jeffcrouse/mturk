@@ -23,7 +23,7 @@ module.exports = function(conf) {
 
   Notification.prototype.validate = function(v) {
     v.check(this.destination, 'Please provide a destination').notNull();
-    v.check(this.transport, 'Please provide a valid transport').isIn(['Email', 'SOAP', 'REST']);
+    v.check(this.transport, 'Please provide a valid transport').isIn(['Email', 'SOAP', 'SQS', 'REST']);
     v.check(this.eventType, 'Please provide the event types').notNull();
     if (! Array.isArray(this.eventType)) {
       v.error('eventTypes argument should be array');

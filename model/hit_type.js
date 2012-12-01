@@ -41,7 +41,7 @@ module.exports = function(conf) {
 
   HITType.prototype.create = function(callback) {
     var self = this
-      , options, remoteErrosr;
+      , options, remoteErrors;
 
     if (! this.valid()) { callback(this.errors); return; }
 
