@@ -1,8 +1,8 @@
 {
     "name": "mturk"
   , "description": "Amazon Mechanical Turk API wrapper for Node"
-  , "version": "0.3.0"
-  , "author": "Expense Cat"
+  , "version": "0.4.1"
+  , "author": "Pedro Teixeira"
   , "repository" :
     { "type" : "git"
     , "url" : "http://github.com/pgte/mturk.git"
@@ -22,6 +22,9 @@
   , "engines": { "node": ">=0.4.0"  }
   , "devDependencies": {
       "nock": "*"
+  }
+  , "scripts": {
+    "test": "make"
   }
   , "tags": ["Mechanical Turk", "Amazon", "API"]
 }
