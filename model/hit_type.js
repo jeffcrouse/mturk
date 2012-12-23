@@ -33,6 +33,11 @@ module.exports = function(conf) {
       v.check(this.autoApprovalDelayInSeconds, 'Please enter a valid autoApprovalDelayInSeconds').notNull().isInt();
       if (this.autoApprovalDelayInSeconds > 2592000) v.error('autoApprovalDelayInSeconds must be <= 2592000');
     }
+    if(this.qualificationRequirement) {
+      v.check(this.qualificationRequirement.QualificationTypeId, "Please provide a QualificationTypeId").notNull();
+      var comparators = ["LessThan", "LessThanOrEqualTo", "GreaterThan", "GreaterThanOrEqualTo", "EqualTo", "NotEqualTo", "Exists"];
+      v.check(this.qualificationRequirement.Comparator, "Please provide a Comparator").isIn(comparators);
+    }
   };
 
   HITType.prototype.populateFromResponse = function(response) {
@@ -53,6 +58,7 @@ module.exports = function(conf) {
     }
     if (this.keywords) options.Keywords = this.keywords;
     if (this.autoApprovalDelayInSeconds) options.autoApprovalDelayInSeconds = this.autoApprovalDelayInSeconds;
+    if (this.qualificationRequirement) options.QualificationRequirement = this.qualificationRequirement;
 
     request('AWSMechanicalTurkRequester', 'RegisterHITType', 'POST', options, function(err, response) {
       if (err) { callback([err]); return; }
@@ -61,7 +67,7 @@ module.exports = function(conf) {
       if (remoteErrors) { callback(new Error(remoteErrors.join(', '))); return; }
       delete response.RegisterHITTypeResult.Request;
 
-      if (! self.nodeExists(['RegisterHITTypeResult', 'HITTypeId'], response)) { callback([new Error('No "RegisterHITTypeResult > HITTypeId" node on RegisterHITType response')]); return; }
+      if (!self.nodeExists(['RegisterHITTypeResult', 'HITTypeId'], response)) { callback([new Error('No "RegisterHITTypeResult > HITTypeId" node on RegisterHITType response')]); return; }
       self.id = response.RegisterHITTypeResult.HITTypeId;
 
       if (err) { err = [err]; }
@@ -79,6 +85,7 @@ module.exports = function(conf) {
   * @param {assignmentDurationInSeconds} The amount of time a Worker has to complete a HIT of this type after accepting it. integer. in seconds. between 30 (30 seconds) and 3153600 (365 days)
   * @param {options.keywords} One or more words or phrases that describe a HIT of this type, separated by commas. string < 1000 chars. Optional.
   * @param {options.autoApprovalDelayInSeconds} An amount of time, in seconds, after an assignment for a HIT of this type has been submitted, that the assignment becomes Approved automatically, unless the Requester explicitly rejects it. integer. Optional. Default is 2592000 (30 days)
+  * @param {options.qualificationRequirement} a QualificationRequirement structure
   * @param {callback} function with signature (Array errors || null, HITType hitType)
   * 
   */
@@ -88,7 +95,7 @@ module.exports = function(conf) {
     var keywords = options.keywords
       , autoApprovalDelayInSeconds = options.autoApprovalDelayInSeconds
       , qualificationRequirement = options.qualificationRequirement
-      , hitType = new HITType(title, description, reward, assignmentDurationInSeconds, keywords, autoApprovalDelayInSeconds);
+      , hitType = new HITType(title, description, reward, assignmentDurationInSeconds, keywords, autoApprovalDelayInSeconds, qualificationRequirement);
 
     hitType.create(function(err) {
       if (err) { callback(err); return; }
