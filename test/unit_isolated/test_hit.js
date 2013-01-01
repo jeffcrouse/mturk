@@ -22,7 +22,7 @@ exports.testCreate = function(beforeExit) {
       
   responseFilePath = 'static/hit_create_response.xml';
   
-  var scope = nock('http://mechanicalturk.amazonaws.com')
+  var scope = nock('https://mechanicalturk.amazonaws.com')
                 .filteringRequestBody(filterBody)
                 .post('/', 'HITTypeId=1&LifetimeInSeconds=1200&Service=AWSMechanicalTurkRequester&Operation=CreateHIT')
                 .replyWithFile(200, __dirname + '/../static/hit_create_response.xml');
@@ -56,7 +56,7 @@ exports.testCreateWithErrors = function(beforeExit) {
       }
     });
   
-  var scope = nock('http://mechanicalturk.amazonaws.com')
+  var scope = nock('https://mechanicalturk.amazonaws.com')
                 .filteringRequestBody(filterBody)
                 .post('/', 'HITTypeId=1&LifetimeInSeconds=1300&Service=AWSMechanicalTurkRequester&Operation=CreateHIT')
                 .replyWithFile(200, __dirname + '/../static/hit_create_response_error.xml');
@@ -84,7 +84,7 @@ exports.testCreateInvalid = function(beforeExit) {
         }
       });
 
-  var scope = nock('http://mechanicalturk.amazonaws.com')
+  var scope = nock('https://mechanicalturk.amazonaws.com')
                 .filteringRequestBody(filterBody)
                 .post('/', 'HITTypeId=1&LifetimeInSeconds=1400&Service=AWSMechanicalTurkRequester&Operation=CreateHIT')
                 .replyWithFile(200, __dirname + '/../static/hit_create_response_invalid.xml');
@@ -106,7 +106,7 @@ exports.testGetValid = function(beforeExit) {
   var calledback = false;
 
 
-  var scope = nock('http://mechanicalturk.amazonaws.com')
+  var scope = nock('https://mechanicalturk.amazonaws.com')
                 .filteringRequestBody(filterBody)
                 .filteringPath(filterBody)
                 .get('/?HITId=ZZRZPTY4ERDZWJ868JCZ&Service=AWSMechanicalTurkRequester&Operation=GetHIT')
@@ -169,7 +169,7 @@ exports.testGetValid = function(beforeExit) {
 exports.testGetReviewableSingleResponse = function(beforeExit) {
   var calledback = false;
 
-  var scope = nock('http://mechanicalturk.amazonaws.com')
+  var scope = nock('https://mechanicalturk.amazonaws.com')
                 .filteringRequestBody(filterBody)
                 .filteringPath(filterBody)
                 .get('/&Service=AWSMechanicalTurkRequester&Operation=GetReviewableHITs')
@@ -196,7 +196,7 @@ exports.testGetReviewableSingleResponse = function(beforeExit) {
 exports.testGetReviewableMultipleResponse = function(beforeExit) {
   var calledback = false;
   
-  var scope = nock('http://mechanicalturk.amazonaws.com')
+  var scope = nock('https://mechanicalturk.amazonaws.com')
                 .filteringRequestBody(filterBody)
                 .filteringPath(filterBody)
                 .get('/?HitTypeId=ABCDEF&Service=AWSMechanicalTurkRequester&Operation=GetReviewableHITs')

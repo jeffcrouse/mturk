@@ -13,7 +13,7 @@ var config = {
 exports.testApprove = function(beforeExit) {
   var calledback = false;
   
-  var mturk = nock('http://mechanicalturk.amazonaws.com')
+  var mturk = nock('https://mechanicalturk.amazonaws.com')
                 .filteringRequestBody(filterBody)
                 .post('/', 'AssignmentId=abcdefghijklmnop123&RequesterFeedback=this%20is%20feedback%20from%20the%20requester&Service=AWSMechanicalTurkRequester&Operation=ApproveAssignment')
                 .replyWithFile(200, __dirname + '/../static/assignment_approve_response.xml');
@@ -56,7 +56,7 @@ exports.populateWorksAsExpected = function() {
 exports.testReject = function(beforeExit) {
   var calledback = false;
 
-  var mturk = nock('http://mechanicalturk.amazonaws.com')
+  var mturk = nock('https://mechanicalturk.amazonaws.com')
                 .filteringRequestBody(filterBody)
                 .post('/', 'AssignmentId=abcdefghijklmnop123&RequesterFeedback=this%20is%20feedback%20from%20the%20requester&Service=AWSMechanicalTurkRequester&Operation=RejectAssignment')
                 .replyWithFile(200, __dirname + '/../static/assignment_reject_response.xml');

@@ -27,7 +27,7 @@ module.exports.testEvents = function(beforeExit) {
     , '4GBHZVQX3EHXZ2AYDY2T0': true
   };
   
-  var scope = nock('http://mechanicalturk.amazonaws.com')
+  var scope = nock('https://mechanicalturk.amazonaws.com')
                 .filteringPath(filterBody)
                 .filteringRequestBody(filterBody)
                 
