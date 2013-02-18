@@ -16,6 +16,9 @@ module.exports = function(conf) {
     this.destination = destination
     this.transport = transport;
     this.eventType = eventTypes;
+    if (this.eventType == 'any') {
+      this.eventType = SUPPORTED_EVENT_TYPES;
+    }
     this.version = '2006-05-05';
   };
 

@@ -62,16 +62,9 @@ module.exports = function(conf) {
 
     request('AWSMechanicalTurkRequester', 'RegisterHITType', 'POST', options, function(err, response) {
       if (err) { callback([err]); return; }
+      self.id = response.Result.RegisterHITTypeResult.HITTypeId;
 
-      remoteErrors = self.remoteRequestValidationError(response.RegisterHITTypeResult);
-      if (remoteErrors) { callback(new Error(remoteErrors.join(', '))); return; }
-      delete response.RegisterHITTypeResult.Request;
-
-      if (!self.nodeExists(['RegisterHITTypeResult', 'HITTypeId'], response)) { callback([new Error('No "RegisterHITTypeResult > HITTypeId" node on RegisterHITType response')]); return; }
-      self.id = response.RegisterHITTypeResult.HITTypeId;
-
-      if (err) { err = [err]; }
-      callback(err);
+      callback(err, response);
     });
   };
 
@@ -122,9 +115,7 @@ module.exports = function(conf) {
 
     if (! notification.valid()) { callback(new Error('invalid Notification: ' + notification.errors.join(', '))); return; }
 
-    request('AWSMechanicalTurkRequester', 'SetHITTypeNotification', 'POST', options, function(err, response) {
-      callback(err);
-    });
+    request('AWSMechanicalTurkRequester', 'SetHITTypeNotification', 'POST', options, callback);
   };
 
   /*

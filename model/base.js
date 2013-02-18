@@ -61,17 +61,3 @@ Base.prototype.nodeExists = function(spec, node) {
     return false;
   }
 };
-
-Base.prototype.remoteRequestValidationError = function(resultNode) {
-  
-  if (! this.nodeExists(['Request', 'IsValid'], resultNode)) return 'No "Request > IsValid" node on response';
-  
-  if (resultNode.Request.IsValid.toLowerCase() != 'true') {
-    var errors = resultNode.Request.Errors && resultNode.Request.Errors.Error;
-    if (!errors) return "Response says request is invalid but no errors were given";
-    if (! Array.isArray(errors)) errors = [errors];
-    errors = errors.map(function(error) { return error.Code + ': ' + error.Message; });
-    return errors;
-  }
-  
-};
