@@ -57,7 +57,22 @@ Creates a HITType. This is the starting point. When creating a HIT you need a HI
 * assignmentDurationInSeconds - The amount of time a Worker has to complete a HIT of this type after accepting it. integer. in seconds. between 30 (30 seconds) and 3153600 (365 days)
 * options.keywords - One or more words or phrases that describe a HIT of this type, separated by commas. string < 1000 chars. Optional.
 * options.autoApprovalDelayInSeconds - An amount of time, in seconds, after an assignment for a HIT of this type has been submitted, that the assignment becomes Approved automatically, unless the Requester explicitly rejects it. integer. Optional. Default is 2592000 (30 days)
+* options.qualificationRequirement  - A [QualificationRequirementDataStructure](http://docs.amazonwebservices.com/AWSMechTurk/latest/AWSMturkAPI/ApiReference_QualificationRequirementDataStructureArticle.html) Optional.  Default is no requirements.
 * callback - function with signature (Array errors || null, HITType hitType)
+
+#### example options
+
+	// For adult-only tasks...
+	var options = { 
+		keywords: "video, dvd covers", 
+		autoApprovalDelayInSeconds: 3600,
+		qualificationRequirement: {
+			QualificationTypeId: "00000000000000000060",
+			Comparator: "EqualTo",
+			IntegerValue: 1,
+			RequiredToPreview: true
+		}
+	};
 
 [API Documentation](http://docs.amazonwebservices.com/AWSMechTurk/latest/AWSMturkAPI/ApiReference_RegisterHITTypeOperation.html)
 
