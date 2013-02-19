@@ -166,17 +166,17 @@ module.exports = function(config) {
 
 
 
-       if (! HIT.prototype.nodeExists(['SearchHITsResult', 'NumResults'], response.Result)) { callback([new Error('No "SearchHITsResult > NumResults" node on the response')]); return; }
-       var numResults = parseInt(response.Result.SearchHITsResult.NumResults, 10);
+       if (! HIT.prototype.nodeExists([, 'NumResults'], response.Result)) { callback([new Error('No "SearchHITsResult > NumResults" node on the response')]); return; }
+       var numResults = parseInt(response.Result.NumResults, 10);
 
-       if (! HIT.prototype.nodeExists(['SearchHITsResult', 'TotalNumResults'], response.Result)) { callback([new Error('No "SearchHITsResult > TotalNumResults" node on the response')]); return; }
-       var totalNumResults = parseInt(response.Result.SearchHITsResult.TotalNumResults, 10);
+       if (! HIT.prototype.nodeExists([ 'TotalNumResults'], response.Result)) { callback([new Error('No "SearchHITsResult > TotalNumResults" node on the response')]); return; }
+       var totalNumResults = parseInt(response.Result.TotalNumResults, 10);
 
-       if (! HIT.prototype.nodeExists(['SearchHITsResult', 'PageNumber'], response.Result)) { callback([new Error('No "SearchHITsResult > PageNumber" node on the response')]); return; }
-       var pageNumber = parseInt(response.Result.SearchHITsResult.PageNumber, 10);
+       if (! HIT.prototype.nodeExists([ 'PageNumber'], response.Result)) { callback([new Error('No "SearchHITsResult > PageNumber" node on the response')]); return; }
+       var pageNumber = parseInt(response.Result.PageNumber, 10);
        
        if (! err) {
-         responseHits = response.Result.SearchHITsResult.HIT;
+         responseHits = response.Result.HIT;
          if (responseHits) {
            if (! Array.isArray(responseHits)) responseHits = [responseHits];
            responseHits.forEach(function(responseHit) {
@@ -244,17 +244,17 @@ module.exports = function(config) {
       if (err) { callback(err); return; }
 
      
-      if (! HIT.prototype.nodeExists(['GetReviewableHITsResult', 'NumResults'], response.Result)) { callback([new Error('No "GetReviewableHITsResult > NumResults" node on the response')]); return; }
-      var numResults = parseInt(response.Result.GetReviewableHITsResult.NumResults, 10);
+      if (! HIT.prototype.nodeExists([ 'NumResults'], response.Result)) { callback([new Error('No "GetReviewableHITsResult > NumResults" node on the response')]); return; }
+      var numResults = parseInt(response.Result.NumResults, 10);
 
-      if (! HIT.prototype.nodeExists(['GetReviewableHITsResult', 'TotalNumResults'], response)) { callback([new Error('No "GetReviewableHITsResult > TotalNumResults" node on the response')]); return; }
-      var totalNumResults = parseInt(response.Result.GetReviewableHITsResult.TotalNumResults, 10);
+      if (! HIT.prototype.nodeExists(['TotalNumResults'], response)) { callback([new Error('No "GetReviewableHITsResult > TotalNumResults" node on the response')]); return; }
+      var totalNumResults = parseInt(response.Result.TotalNumResults, 10);
 
-      if (! HIT.prototype.nodeExists(['GetReviewableHITsResult', 'PageNumber'], response.Result)) { callback([new Error('No "GetReviewableHITsResult > PageNumber" node on the response')]); return; }
-      var pageNumber = parseInt(response.Result.GetReviewableHITsResult.PageNumber, 10);
+      if (! HIT.prototype.nodeExists([ 'PageNumber'], response.Result)) { callback([new Error('No "GetReviewableHITsResult > PageNumber" node on the response')]); return; }
+      var pageNumber = parseInt(response.Result.PageNumber, 10);
 
       if (! err) {
-        responseHits = response.Result.GetReviewableHITsResult.HIT;
+        responseHits = response.Result.HIT;
         if (responseHits) {
           if (! Array.isArray(responseHits)) responseHits = [responseHits];
           responseHits.forEach(function(responseHit) {
@@ -298,16 +298,16 @@ module.exports = function(config) {
      var numResults, pageNumber, totalNumResults, resultAssignments, assignments;
      if (err) { callback(err); return; }
 
-     if (! HIT.prototype.nodeExists(['GetAssignmentsForHITResult', 'NumResults'], response.Result)) { callback([new Error('No "GetAssignmentsForHITResult > NumResults" node on the response')]); return; }
-     numResults = parseInt(response.Result.GetAssignmentsForHITResult.NumResults, 10);
+     if (! HIT.prototype.nodeExists(['NumResults'], response.Result)) { callback([new Error('No "GetAssignmentsForHITResult > NumResults" node on the response')]); return; }
+     numResults = parseInt(response.Result.NumResults, 10);
 
-     if (! HIT.prototype.nodeExists(['GetAssignmentsForHITResult', 'PageNumber'], response.Result)) { callback([new Error('No "GetAssignmentsForHITResult > PageNumber" node on the response')]); return; }
-     pageNumber = parseInt(response.Result.GetAssignmentsForHITResult.PageNumber, 10);
+     if (! HIT.prototype.nodeExists([ 'PageNumber'], response.Result)) { callback([new Error('No "GetAssignmentsForHITResult > PageNumber" node on the response')]); return; }
+     pageNumber = parseInt(response.Result.PageNumber, 10);
 
-     if (! HIT.prototype.nodeExists(['GetAssignmentsForHITResult', 'TotalNumResults'], response.Result)) { callback([new Error('No "GetAssignmentsForHITResult > NumResults" node on the response')]); return; }
-     totalNumResults = parseInt(response.Result.GetAssignmentsForHITResult.TotalNumResults, 10);
+     if (! HIT.prototype.nodeExists(['TotalNumResults'], response.Result)) { callback([new Error('No "GetAssignmentsForHITResult > NumResults" node on the response')]); return; }
+     totalNumResults = parseInt(response.Result.TotalNumResults, 10);
 
-     resultAssignments = response.Result.GetAssignmentsForHITResult.Assignment;
+     resultAssignments = response.Result.Assignment;
      if (resultAssignments === undefined) {
        resultAssignments = [];
      } else {

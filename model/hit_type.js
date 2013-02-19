@@ -62,7 +62,7 @@ module.exports = function(conf) {
 
     request('AWSMechanicalTurkRequester', 'RegisterHITType', 'POST', options, function(err, response) {
       if (err) { callback([err]); return; }
-      self.id = response.Result.RegisterHITTypeResult.HITTypeId;
+      self.id = response.Result.HITTypeId;
 
       callback(err, response);
     });
