@@ -48,11 +48,8 @@ module.exports = function(config) {
     };
     request('AWSMechanicalTurkRequester', 'ApproveAssignment', 'POST', options, function(err, response) {
       if (err) { return callback(err); } 
-      if (! Assignment.prototype.nodeExists(['ApproveAssignmentResult', 'Request', 'IsValid'], response)) { callback([new Error('No "ApproveAssignmentResult > Request > IsValid" node on the response')]); return; }
-      if (response.ApproveAssignmentResult.Request.IsValid.toLowerCase() != 'true') {
-        return callback([new Error('Response says ApproveAssignmentResult request is invalid: ' + JSON.stringify(response.ApproveAssignmentResult.Request.Errors))]);
-      }
-      callback(null);
+     
+      callback(null, response);
     });
   }
 
@@ -84,11 +81,8 @@ module.exports = function(config) {
     };
     request('AWSMechanicalTurkRequester', 'RejectAssignment', 'POST', options, function(err, response) {
       if (err) { return callback(err); } 
-      if (! Assignment.prototype.nodeExists(['RejectAssignmentResult', 'Request', 'IsValid'], response)) { callback([new Error('No "RejectAssignmentResult > Request > IsValid" node on the response')]); return; }
-      if (response.RejectAssignmentResult.Request.IsValid.toLowerCase() != 'true') {
-        return callback([new Error('Response says RejectAssignmentResult request is invalid: ' + JSON.stringify(response.RejectAssignmentResult.Request.Errors))]);
-      }
-      callback(null);
+      
+      callback(null, response);
     });
   }
 

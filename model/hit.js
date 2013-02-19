@@ -39,7 +39,14 @@ module.exports = function(config) {
       , HITReviewStatus: 'hitReviewStatus'
     });
     if (this.requesterAnnotation) {
-      this.requesterAnnotation = JSON.parse(this.requesterAnnotation);
+      try {
+         this.requesterAnnotation = JSON.parse(this.requesterAnnotation);
+      }
+      catch (ex){
+          console.log("Error parsing requesterAnnotation:" + ex.message);
+          this.requesterAnnotation = null;
+      }
+
     }
   };
 
@@ -57,16 +64,11 @@ module.exports = function(config) {
     if (self.maxAssignments) options.MaxAssignments =  self.maxAssignments;
     if (self.requesterAnnotation) options.RequesterAnnotation =  self.requesterAnnotation;
 
-    request('AWSMechanicalTurkRequester', 'CreateHIT', 'POST', options, function(err, response) {
+    request('AWSMechanicalTurkRequester', 'CreateHIT', 'POST', options, "HIT", function(err, response) {
       if (err) { return callback([err]); }
 
-      remoteErrors = self.remoteRequestValidationError(response.HIT);
-      if (remoteErrors) { return callback(remoteErrors.map(function(error) { return new Error(error); })); }
-      delete response.HIT.Request;
-
-      self.populateFromResponse(response.HIT);
-      if (err) { err = [err]; }
-      callback(err);
+      self.populateFromResponse(response.Result);
+      callback(err, response);
     });
   };
 
@@ -94,6 +96,8 @@ module.exports = function(config) {
     });
   };
 
+ 
+
   /*
    * force expire a HIT
    *
@@ -104,17 +108,7 @@ module.exports = function(config) {
    ret.expire = function(hitId, callback) {
      var self = this;
 
-     request('AWSMechanicalTurkRequester', 'ForceExpireHIT', 'GET', { HITId: hitId}, function(err, response) {
-       if (err) { callback(err); return; }
-
-       if (! HIT.prototype.nodeExists(['ForceExpireHITResult', 'Request', 'IsValid'], response)) { callback([new Error('No "ForceExpireHITResult > Request > IsValid" node on the response')]); return; }
-       if (response.ForceExpireHITResult.Request.IsValid.toLowerCase() != 'true') {
-         callback([new Error('Response says ForceExpireHITResult is invalid')]);
-         return;
-       }
-
-       callback(err);
-     })
+     request('AWSMechanicalTurkRequester', 'ForceExpireHIT', 'GET', { HITId: hitId}, callback)
    }
 
   /*
@@ -127,17 +121,7 @@ module.exports = function(config) {
   ret.dispose = function(hitId, callback) {
     var self = this;
 
-    request('AWSMechanicalTurkRequester', 'DisposeHIT', 'GET', { HITId: hitId }, function(err, response) {
-      if (err) { callback(err); return; }
-
-      if (! HIT.prototype.nodeExists(['DisposeHITResult', 'Request', 'IsValid'], response)) { callback([new Error('No "DisposeHITResult > Request > IsValid" node on the response')]); return; }
-      if (response.DisposeHITResult.Request.IsValid.toLowerCase() != 'true') {
-        callback([new Error('Response says DisposeHITResult is invalid')]);
-        return;
-      }
-
-      callback(err);
-    });
+    request('AWSMechanicalTurkRequester', 'DisposeHIT', 'GET', { HITId: hitId }, callback);
   }
 
   /*
@@ -150,18 +134,7 @@ module.exports = function(config) {
   ret.disable = function(hitId, callback) {
     var self = this;
 
-    request('AWSMechanicalTurkRequester', 'DisableHIT', 'GET', { HITId: hitId }, function(err, response) {
-   
-      if (err) { callback(err); return; }
-
-      if (! HIT.prototype.nodeExists(['DisableHITResult', 'Request', 'IsValid'], response)) { callback([new Error('No "HIT > Request > IsValid" node on the response')]); return; }
-      if (response.DisableHITResult.Request.IsValid.toLowerCase() != 'true') {
-        callback([new Error('Response says HIT is invalid')]);
-        return;
-      }
-      delete response.DisableHITResult.Request;
-      callback(err);
-    });
+    request('AWSMechanicalTurkRequester', 'DisableHIT', 'GET', { HITId: hitId }, callback);
   };
 
 
@@ -191,24 +164,19 @@ module.exports = function(config) {
 
        if (err) { callback(err); return; }
 
-       if (! HIT.prototype.nodeExists(['SearchHITsResult', 'Request', 'IsValid'], response)) { callback([new Error('No "SearchHITsResult > Request > IsValid" node on the response')]); return; }
-       if (response.SearchHITsResult.Request.IsValid.toLowerCase() != 'true') {
-         callback([new Error('Response says SearchHITsResult request is invalid')]);
-         return;
-       }
-       delete response.SearchHITsResult.Request;
 
-       if (! HIT.prototype.nodeExists(['SearchHITsResult', 'NumResults'], response)) { callback([new Error('No "SearchHITsResult > NumResults" node on the response')]); return; }
-       var numResults = parseInt(response.SearchHITsResult.NumResults, 10);
 
-       if (! HIT.prototype.nodeExists(['SearchHITsResult', 'TotalNumResults'], response)) { callback([new Error('No "SearchHITsResult > TotalNumResults" node on the response')]); return; }
-       var totalNumResults = parseInt(response.SearchHITsResult.TotalNumResults, 10);
+       if (! HIT.prototype.nodeExists([, 'NumResults'], response.Result)) { callback([new Error('No "SearchHITsResult > NumResults" node on the response')]); return; }
+       var numResults = parseInt(response.Result.NumResults, 10);
 
-       if (! HIT.prototype.nodeExists(['SearchHITsResult', 'PageNumber'], response)) { callback([new Error('No "SearchHITsResult > PageNumber" node on the response')]); return; }
-       var pageNumber = parseInt(response.SearchHITsResult.PageNumber, 10);
+       if (! HIT.prototype.nodeExists([ 'TotalNumResults'], response.Result)) { callback([new Error('No "SearchHITsResult > TotalNumResults" node on the response')]); return; }
+       var totalNumResults = parseInt(response.Result.TotalNumResults, 10);
+
+       if (! HIT.prototype.nodeExists([ 'PageNumber'], response.Result)) { callback([new Error('No "SearchHITsResult > PageNumber" node on the response')]); return; }
+       var pageNumber = parseInt(response.Result.PageNumber, 10);
        
        if (! err) {
-         responseHits = response.SearchHITsResult.HIT;
+         responseHits = response.Result.HIT;
          if (responseHits) {
            if (! Array.isArray(responseHits)) responseHits = [responseHits];
            responseHits.forEach(function(responseHit) {
@@ -218,7 +186,7 @@ module.exports = function(config) {
            });
          }
        }
-       callback(err, numResults, totalNumResults, pageNumber, hits);       
+       callback(err, numResults, totalNumResults, pageNumber, hits, response);       
      });
    };
 
@@ -232,23 +200,15 @@ module.exports = function(config) {
   ret.get = function(hitId, callback) {
     var self = this;
 
-    request('AWSMechanicalTurkRequester', 'GetHIT', 'GET', { HITId: hitId }, function(err, response) {
+    request('AWSMechanicalTurkRequester', 'GetHIT', 'GET', { HITId: hitId }, "HIT", function(err, response) {
       var hit;
 
-      if (err) { callback(err); return; }
-
-      if (! HIT.prototype.nodeExists(['HIT', 'Request', 'IsValid'], response)) { callback([new Error('No "HIT > Request > IsValid" node on the response')]); return; }
-      if (response.HIT.Request.IsValid.toLowerCase() != 'true') {
-        callback([new Error('Response says HIT is invalid')]);
-        return;
-      }
-      delete response.HIT.Request;
-
+      
       if (! err) {
         hit = new HIT();
-        hit.populateFromResponse(response.HIT);
+        hit.populateFromResponse(response.Result);
       }
-      callback(err, hit);
+      callback(err, hit, response);
     });
   };
 
@@ -283,24 +243,18 @@ module.exports = function(config) {
 
       if (err) { callback(err); return; }
 
-      if (! HIT.prototype.nodeExists(['GetReviewableHITsResult', 'Request', 'IsValid'], response)) { callback([new Error('No "GetReviewableHITsResult > Request > IsValid" node on the response')]); return; }
-      if (response.GetReviewableHITsResult.Request.IsValid.toLowerCase() != 'true') {
-        callback([new Error('Response says GetReviewableHITs request is invalid')]);
-        return;
-      }
-      delete response.GetReviewableHITsResult.Request;
+     
+      if (! HIT.prototype.nodeExists([ 'NumResults'], response.Result)) { callback([new Error('No "GetReviewableHITsResult > NumResults" node on the response')]); return; }
+      var numResults = parseInt(response.Result.NumResults, 10);
 
-      if (! HIT.prototype.nodeExists(['GetReviewableHITsResult', 'NumResults'], response)) { callback([new Error('No "GetReviewableHITsResult > NumResults" node on the response')]); return; }
-      var numResults = parseInt(response.GetReviewableHITsResult.NumResults, 10);
+      if (! HIT.prototype.nodeExists(['TotalNumResults'], response)) { callback([new Error('No "GetReviewableHITsResult > TotalNumResults" node on the response')]); return; }
+      var totalNumResults = parseInt(response.Result.TotalNumResults, 10);
 
-      if (! HIT.prototype.nodeExists(['GetReviewableHITsResult', 'TotalNumResults'], response)) { callback([new Error('No "GetReviewableHITsResult > TotalNumResults" node on the response')]); return; }
-      var totalNumResults = parseInt(response.GetReviewableHITsResult.TotalNumResults, 10);
-
-      if (! HIT.prototype.nodeExists(['GetReviewableHITsResult', 'PageNumber'], response)) { callback([new Error('No "GetReviewableHITsResult > PageNumber" node on the response')]); return; }
-      var pageNumber = parseInt(response.GetReviewableHITsResult.PageNumber, 10);
+      if (! HIT.prototype.nodeExists([ 'PageNumber'], response.Result)) { callback([new Error('No "GetReviewableHITsResult > PageNumber" node on the response')]); return; }
+      var pageNumber = parseInt(response.Result.PageNumber, 10);
 
       if (! err) {
-        responseHits = response.GetReviewableHITsResult.HIT;
+        responseHits = response.Result.HIT;
         if (responseHits) {
           if (! Array.isArray(responseHits)) responseHits = [responseHits];
           responseHits.forEach(function(responseHit) {
@@ -310,7 +264,7 @@ module.exports = function(config) {
           });
         }
       }
-      callback(err, numResults, totalNumResults, pageNumber, hits);
+      callback(err, numResults, totalNumResults, pageNumber, hits, response);
     });
 
   };
@@ -344,16 +298,16 @@ module.exports = function(config) {
      var numResults, pageNumber, totalNumResults, resultAssignments, assignments;
      if (err) { callback(err); return; }
 
-     if (! HIT.prototype.nodeExists(['GetAssignmentsForHITResult', 'NumResults'], response)) { callback([new Error('No "GetAssignmentsForHITResult > NumResults" node on the response')]); return; }
-     numResults = parseInt(response.GetAssignmentsForHITResult.NumResults, 10);
+     if (! HIT.prototype.nodeExists(['NumResults'], response.Result)) { callback([new Error('No "GetAssignmentsForHITResult > NumResults" node on the response')]); return; }
+     numResults = parseInt(response.Result.NumResults, 10);
 
-     if (! HIT.prototype.nodeExists(['GetAssignmentsForHITResult', 'PageNumber'], response)) { callback([new Error('No "GetAssignmentsForHITResult > PageNumber" node on the response')]); return; }
-     pageNumber = parseInt(response.GetAssignmentsForHITResult.PageNumber, 10);
+     if (! HIT.prototype.nodeExists([ 'PageNumber'], response.Result)) { callback([new Error('No "GetAssignmentsForHITResult > PageNumber" node on the response')]); return; }
+     pageNumber = parseInt(response.Result.PageNumber, 10);
 
-     if (! HIT.prototype.nodeExists(['GetAssignmentsForHITResult', 'TotalNumResults'], response)) { callback([new Error('No "GetAssignmentsForHITResult > NumResults" node on the response')]); return; }
-     totalNumResults = parseInt(response.GetAssignmentsForHITResult.TotalNumResults, 10);
+     if (! HIT.prototype.nodeExists(['TotalNumResults'], response.Result)) { callback([new Error('No "GetAssignmentsForHITResult > NumResults" node on the response')]); return; }
+     totalNumResults = parseInt(response.Result.TotalNumResults, 10);
 
-     resultAssignments = response.GetAssignmentsForHITResult.Assignment;
+     resultAssignments = response.Result.Assignment;
      if (resultAssignments === undefined) {
        resultAssignments = [];
      } else {
@@ -366,7 +320,7 @@ module.exports = function(config) {
        return assignment;
      });
 
-     callback(null, numResults, pageNumber, totalNumResults, assignments);
+     callback(null, numResults, pageNumber, totalNumResults, assignments, response);
    });
   };
 
