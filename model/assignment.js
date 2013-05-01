@@ -103,6 +103,44 @@ module.exports = function(config) {
   Assignment.prototype.reject = function(requesterFeedback, callback) {
     return ret.reject(this.id, requesterFeedback, callback);
   };
+
+
+   /*
+   * Approves a rejected Assignment
+   *
+   * @param {assignmentId} the Assignment id (string)
+   * @param {requesterFeedback} A message for the Worker, which the Worker can see in the Status section of the web site. (string max 1024 characters). Optional.
+   * @param {callback} function with signature (error)
+   * 
+   */
+  ret.reject = function approveRejected(assignmentId, requesterFeedback, callback) {
+    var options = {
+        AssignmentId: assignmentId
+      , RequesterFeedback: requesterFeedback
+    };
+    request('AWSMechanicalTurkRequester', 'ApproveRejectedAssignment', 'POST', options, function(err, response) {
+      if (err) { return callback(err); } 
+      if (! Assignment.prototype.nodeExists(['ApproveRejectedAssignmentResult', 'Request', 'IsValid'], response)) { callback([new Error('No "ApproveRejectedAssignmentResult > Request > IsValid" node on the response')]); return; }
+      if (response.ApproveRejectedAssignmentResult.Request.IsValid.toLowerCase() != 'true') {
+        return callback([new Error('Response says ApproveRejectedAssignmentResult request is invalid: ' + JSON.stringify(response.ApproveRejectedAssignmentResult.Request.Errors))]);
+      }
+      callback(null);
+    });
+  }
+
+
+  /*
+   * Approves the rejected Assignment
+   *
+   * @param {requesterFeedback} A message for the Worker, which the Worker can see in the Status section of the web site. (string max 1024 characters). Optional
+   * @param {callback} function with signature (error)
+   * 
+   */
+  Assignment.prototype.approveRejected = function(requesterFeedback, callback) {
+    return ret.approveRejected(this.id, requesterFeedback, callback);
+  };
+
+
   
   return ret;
   
