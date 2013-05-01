@@ -113,7 +113,7 @@ module.exports = function(config) {
    * @param {callback} function with signature (error)
    * 
    */
-  ret.reject = function approveRejected(assignmentId, requesterFeedback, callback) {
+  ret.approveRejected = function approveRejected(assignmentId, requesterFeedback, callback) {
     var options = {
         AssignmentId: assignmentId
       , RequesterFeedback: requesterFeedback
