@@ -137,6 +137,14 @@ Disables specified HIT.
 
 [API Documentation](http://docs.amazonwebservices.com/AWSMechTurk/latest/AWSMturkAPI/ApiReference_DisableHITOperation.html)
 
+### HIT.expire(hitId, callback)
+
+Force expire specified HIT.
+
+* hitId - The ID of the HIT to retrieve (String)
+* callback - function with signature (Error error || null)
+
+[API Documentation](http://docs.aws.amazon.com/AWSMechTurk/latest/AWSMturkAPI/ApiReference_ForceExpireHITOperation.html)
 
 ### HIT.getReviewable(options, callback)
 
