@@ -14,7 +14,13 @@ module.exports = function(conf) {
     if (assignmentDurationInSeconds) this.assignmentDurationInSeconds = assignmentDurationInSeconds;
     if (keywords) this.keywords = keywords;
     if (autoApprovalDelayInSeconds) this.autoApprovalDelayInSeconds = autoApprovalDelayInSeconds;
-    if (qualificationRequirement) this.qualificationRequirement = qualificationRequirement;
+    if (qualificationRequirement) {
+      // convert qualificationrequirement to array
+      if (!Array.isArray(qualificationRequirement)) {
+        qualificationRequirement = [qualificationRequirement]
+      }
+      this.qualificationRequirement = qualificationRequirement
+    }
   }
 
   inherits(HITType, Base);
@@ -34,9 +40,11 @@ module.exports = function(conf) {
       if (this.autoApprovalDelayInSeconds > 2592000) v.error('autoApprovalDelayInSeconds must be <= 2592000');
     }
     if(this.qualificationRequirement) {
-      v.check(this.qualificationRequirement.QualificationTypeId, "Please provide a QualificationTypeId").notNull();
-      var comparators = ["LessThan", "LessThanOrEqualTo", "GreaterThan", "GreaterThanOrEqualTo", "EqualTo", "NotEqualTo", "Exists"];
-      v.check(this.qualificationRequirement.Comparator, "Please provide a Comparator").isIn(comparators);
+      this.qualificationRequirement.forEach(function(requirement) {
+        v.check(requirement.QualificationTypeId, "Please provide a QualificationTypeId").notNull();
+        var comparators = ["LessThan", "LessThanOrEqualTo", "GreaterThan", "GreaterThanOrEqualTo", "EqualTo", "NotEqualTo", "Exists"];
+        v.check(requirement.Comparator, "Please provide a Comparator").isIn(comparators);
+      })
     }
   };
 
