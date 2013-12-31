@@ -7,7 +7,7 @@
 
 var crypto = require('crypto')
 	, request = require('request')
-	, libxmljs = require("libxmljs")
+	, libxml = require("libxmljs")
 	, util = require('util')
 	, check = require('validator').check
 	, sanitize = require('validator').sanitize
@@ -309,6 +309,8 @@ module.exports = function(settings) {
 				callback(err, null);
 			} else {
 				try {
+					var hit = libxmlToJSON( doc.get("//HIT") );
+					/*
 					var hit = {
 						HITId: doc.get("//HIT/HITId").text()
 						, HITTypeId: doc.get("//HIT/HITTypeId").text()
@@ -322,6 +324,7 @@ module.exports = function(settings) {
 						, AssignmentDurationInSeconds: parseInt(doc.get("//HIT/AssignmentDurationInSeconds").text())
 						, HITReviewStatus: doc.get("//HIT/HITReviewStatus").text()
 					};
+					*/
 					callback(null, hit);
 				} catch(err) {
 					callback(err, null);
@@ -517,7 +520,7 @@ module.exports = function(settings) {
 			if(err) {
 				callback(err, null);
 			} else {
-		
+			
 				var hits = [];
 				doc.find("//HIT").forEach(function(elem){
 					hits.push(  elem.text()  );
@@ -598,6 +601,43 @@ module.exports = function(settings) {
 		return pairs.join("&");
 	}
 
+	function trim1(str) {
+	    return str.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+	}
+
+
+	/**
+	*
+	* @see https://github.com/polotek/libxmljs/blob/master/docs/api/Element.md
+	*/
+	mturk.libxmlToJSON = function(elem) {
+		var converted = {};
+
+		if(elem.name()=="text") {
+			return trim1( elem.text() )
+		}
+
+		elem.childNodes().forEach(function(it){
+			var name = it.name();
+			var value = mturk.libxmlToJSON(it);
+			if(value) {
+				if(name=="text") {
+					converted = value;
+				} else if(converted.hasOwnProperty(name)) {
+					if(converted[name] instanceof Array) {
+						converted[name].push( value );
+					} else {
+						var old = converted[name];
+						converted[name] = [old, value];
+					}				
+				} else {
+					converted[name] = value;
+				}
+			}
+		});
+	
+		return converted;
+	}
 
 	/**
 	* Executes a call to the Mechanical Turk API
@@ -624,12 +664,12 @@ module.exports = function(settings) {
 			} else if(response.statusCode != 200) {
 				callback(params.Operation+": "+response.statusCode);
 			} else {
-				var doc = libxmljs.parseXml(xml);
+				var doc = libxml.parseXml(xml);
 				if(doc.errors.length>0) {
 					callback(params.Operation+": "+doc.errors[0], null);
 				} else {
 					var error = doc.get("//Error/Message");
-					var valid = doc.get("//Request/IsValid").text().toLowerCase()=="true";
+					var valid = doc.get("//Request/IsValid").text()=="True";
 					if(error || !valid ) {
 						callback(params.Operation+": "+error.text(), null);
 					} else {
