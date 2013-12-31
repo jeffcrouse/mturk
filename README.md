@@ -1,23 +1,7 @@
-# Intro
 
-Amazon Mechanical Turk API wrapper for Node.
 
-# Install
+## Other Reading
 
-    npm install mturk
+Before you use this module, it's very helpful to understand exactly how a a HIT, the fundamental unit of work on MTurk, works. This is a great guide:
 
-# Use
-
-    var mturk = require('mturk');
-
-Check [the API docs](https://github.com/jefftimesten/mturk/blob/master/API.md).
-
-# Tests
-
-You must have expresso installed first:
-
-      $ npm install expresso
-
-Then run:
-
-      $ make
+http://mechanicalturk.typepad.com/blog/2011/04/overview-lifecycle-of-a-hit-.html
