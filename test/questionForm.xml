@@ -1,9 +1,15 @@
 <QuestionForm xmlns="http://mechanicalturk.amazonaws.com/AWSMechanicalTurkDataSchemas/2005-10-01/QuestionForm.xsd">
 	
-	<!-- QUESTION ONE -->
+	
 	<Overview>
-		This first question is just used to test your research skills.
+	    <Title>Test Questions</Title>
+	    <Text>
+	      This first question is just used to test your research skills.
+	    </Text>
 	</Overview>
+
+
+	<!-- QUESTION ONE -->
 	<Question>
 		<QuestionIdentifier>001</QuestionIdentifier>
 		<DisplayName>Question 01</DisplayName>
@@ -28,10 +34,12 @@
 
 
 
-	<!-- QUESTION TWO -->
 	<Overview>
-		The next few questions are pretty random.
+		<Text>The next few questions are pretty random.</Text>
 	</Overview>
+
+
+	<!-- QUESTION TWO -->
 	<Question>
 		<QuestionIdentifier>002</QuestionIdentifier>
 		<DisplayName>Question 02</DisplayName>
@@ -85,6 +93,8 @@
 			</SelectionAnswer>
 		</AnswerSpecification>
 	</Question>
+
+
 
 	<!-- QUESTION FOUR -->
 	<Question>

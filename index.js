@@ -12,6 +12,7 @@ var crypto = require('crypto')
 	, check = require('validator').check
 	, sanitize = require('validator').sanitize
 	, querystring = require('querystring')
+	, async = require('async')
 	;
 
 
@@ -59,6 +60,17 @@ module.exports = function(settings) {
 		IntegerValue: 1,
 		RequiredToPreview: true
 	};
+
+
+
+/**********************************************************
+              _                  _   _               _     
+   __ _ _ __ (_)  _ __ ___   ___| |_| |__   ___   __| |___ 
+  / _` | '_ \| | | '_ ` _ \ / _ \ __| '_ \ / _ \ / _` / __|
+ | (_| | |_) | | | | | | | |  __/ |_| | | | (_) | (_| \__ \
+  \__,_| .__/|_| |_| |_| |_|\___|\__|_| |_|\___/ \__,_|___/
+       |_|                                                 
+**********************************************************/
 
 
 
@@ -224,7 +236,7 @@ module.exports = function(settings) {
 			if(err) {
 				callback(err, null);
 			} else {
-				var balance = doc.get("/GetAccountBalanceResponse/GetAccountBalanceResult/AvailableBalance/Amount");
+				var balance = doc.get("//GetAccountBalanceResult/AvailableBalance/Amount");
 				if(balance) {
 					callback(null, parseFloat(balance.text()));
 				}
@@ -309,22 +321,7 @@ module.exports = function(settings) {
 				callback(err, null);
 			} else {
 				try {
-					var hit = libxmlToJSON( doc.get("//HIT") );
-					/*
-					var hit = {
-						HITId: doc.get("//HIT/HITId").text()
-						, HITTypeId: doc.get("//HIT/HITTypeId").text()
-						, CreationTime:  new Date( Date.parse( doc.get("//HIT/CreationTime").text() ) )
-						, Title: doc.get("//HIT/Title").text()
-						, Description: doc.get("//HIT/Description").text()
-						, Question: doc.get("//HIT/Question").text()
-						, HITStatus: doc.get("//HIT/HITStatus").text()
-						, MaxAssignments: parseInt( doc.get("//HIT/MaxAssignments").text() )
-						, Expiration: new Date( Date.parse( doc.get("//HIT/Expiration").text() ) )
-						, AssignmentDurationInSeconds: parseInt(doc.get("//HIT/AssignmentDurationInSeconds").text())
-						, HITReviewStatus: doc.get("//HIT/HITReviewStatus").text()
-					};
-					*/
+					var hit = mturk.libxmlToJSON( doc.get("//HIT") );
 					callback(null, hit);
 				} catch(err) {
 					callback(err, null);
@@ -512,21 +509,16 @@ module.exports = function(settings) {
 		};
 		params = merge(defaults, params);
 
-		if(params.hasOwnProperty("SortProperty")) {
-			check(params.SortProperty).notNull().isIn(["Title", "Reward", "Expiration", "CreationTime", "Enumeration"]);
-		}
+		check(params.SortProperty).notNull().isIn(["Title", "Reward", "Expiration", "CreationTime", "Enumeration"]);
+		check(params.PageSize).min(1).max(100);
+		check(params.SortDirection).notNull().isIn(["Ascending", "Descending"]);
 
 		this.doRequest(params, function(err, doc){
 			if(err) {
 				callback(err, null);
 			} else {
-			
-				var hits = [];
-				doc.find("//HIT").forEach(function(elem){
-					hits.push(  elem.text()  );
-				});
-				callback(null, hits);
-				
+				var result = mturk.libxmlToJSON( doc.get("//SearchHITsResult") );
+				callback(null, result);
 			}
 		});
 	}
@@ -550,6 +542,7 @@ module.exports = function(settings) {
 		params = merge(defaults, params);
 
 		check(params.HITId).notNull();
+
 		this.doRequest(params, function(err, doc){
 			if(err) {
 				callback(err);
@@ -562,13 +555,42 @@ module.exports = function(settings) {
 
 
 
+/**************************************************************************
+  _                _                            _   _               _     
+ | |__   ___ _ __ | | ___ _ __   _ __ ___   ___| |_| |__   ___   __| |___ 
+ | '_ \ / _ \ '_ \| |/ _ \ '__| | '_ ` _ \ / _ \ __| '_ \ / _ \ / _` / __|
+ | | | |  __/ |_) | |  __/ |    | | | | | |  __/ |_| | | | (_) | (_| \__ \
+ |_| |_|\___| .__/|_|\___|_|    |_| |_| |_|\___|\__|_| |_|\___/ \__,_|___/
+            |_|                                                           
+**************************************************************************/
 
-	/********************
-	*
-	* UTILITY METHODS
-	*
-	*********************/
 
+	/**
+	*
+	*/
+	mturk.disableHITs = function(num, callback) {
+		mturk.SearchHITs({"PageSize": num}, function(err, SearchHITsResult){
+			if(err) callback(err);
+			else {
+				//var IDs = SearchHITsResult.HIT.map(function(HIT){ return { "HITId": HIT.HITId}; });
+				//async.each(IDs, mturk.DisableHIT, callback);
+				async.each(SearchHITsResult.HIT, function(item, done){
+					mturk.DisableHIT({ "HITId": item.HITId}, done);
+				}, callback);
+			}
+		});
+	}
+
+
+
+/**************************************************************************
+        _   _ _ _ _                          _   _               _     
+  _   _| |_(_) (_) |_ _   _   _ __ ___   ___| |_| |__   ___   __| |___ 
+ | | | | __| | | | __| | | | | '_ ` _ \ / _ \ __| '_ \ / _ \ / _` / __|
+ | |_| | |_| | | | |_| |_| | | | | | | |  __/ |_| | | | (_) | (_| \__ \
+  \__,_|\__|_|_|_|\__|\__, | |_| |_| |_|\___|\__|_| |_|\___/ \__,_|___/
+                      |___/                                            
+**************************************************************************/
 
 	/**
 	* Takes an object of parameters and translates it into a REST query string that AWS will like.
