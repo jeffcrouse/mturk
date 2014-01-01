@@ -57,8 +57,6 @@ describe('mturk', function(){
 	});
 
 
-
-
 	/**
 	*	Sanity check: mturk object properties
 	*/
@@ -79,7 +77,6 @@ describe('mturk', function(){
 			mturk.QualificationRequirements.Adults.should.be.a("Object");
 		});
 	});
-
 
 
 	/**

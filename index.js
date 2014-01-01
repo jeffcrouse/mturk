@@ -27,7 +27,7 @@ module.exports = function(settings) {
 	mturk.accessKey = settings.creds.accessKey;
 	mturk.secretKey = settings.creds.secretKey;
 	mturk.sandbox = settings.sandbox || false;
-	mturk.version = settings.version || "2012-03-25";
+	mturk.version = "2012-03-25";
 	mturk.service = "AWSMechanicalTurkRequester";
 
 	/**
@@ -74,7 +74,6 @@ module.exports = function(settings) {
 
 
 
-
 	/**
 	* The ApproveAssignment operation approves the results of a completed assignment.
 	* 
@@ -102,6 +101,65 @@ module.exports = function(settings) {
 			}
 		});
 	}
+
+
+	/**
+	* The ApproveRejectedAssignment operation approves an assignment that was previously rejected.
+	*
+	* @see http://docs.aws.amazon.com/AWSMechTurk/latest/AWSMturkAPI/ApiReference_ApproveRejectedAssignmentOperation.html
+	* @param {Object} params Parameters for the API call
+	* @param {String} params.AssinmentId The ID of the assignment. This parameter must correspond to a HIT created by the Requester.
+	* @param {String} [params.RequesterFeedback] A message for the Worker, which the Worker can see in the Status section of the web site.
+	* @param {function()} callback A callback function 
+	* @throws {TypeError} if a AssignmentId isn't provided
+	*/
+	mturk.ApproveRejectedAssignment = function(params, callback) {
+		var defaults = {
+			"Operation": "ApproveAssignment"
+			, "AssignmentId": null
+			, "RequesterFeedback": null
+		};
+		params = merge(defaults, params);
+		check(params.AssignmentId).notNull();
+
+		this.doRequest(params, function(err, doc){
+			if(err) {
+				callback(err, null);
+			} else {
+				callback(null, params.AssignmentId);
+			}
+		});
+	}
+
+
+	/**
+	*
+	* @see http://docs.aws.amazon.com/AWSMechTurk/latest/AWSMturkAPI/ApiReference_BlockWorkerOperation.html
+	* @param {Object} params Parameters for the API call
+	* @param {String} params.WorkerId The ID of the Worker to block.
+	* @param {String} [params.Reason] A message explaining the reason for blocking the Worker. This parameter enables you to keep track of your Workers. The Worker does not see this message.
+	* @param {function()} callback A callback function 
+	* @throws {TypeError} if a WorkerId isn't provided
+	*/
+	mturk.BlockWorker = function(params, callback) {
+		var defaults = {
+			"Operation": "BlockWorker"
+			, "WorkerId": null
+			, "Reason": null
+		};
+
+		params = merge(defaults, params);
+		check(params.WorkerId).notNull();
+		
+		this.doRequest(params, function(err, doc){
+			if(err) {
+				callback(err, null);
+			} else {
+				callback(null, params.WorkerId);
+			}
+		});
+	}
+
 
 
 	/**
@@ -243,6 +301,7 @@ module.exports = function(settings) {
 			}
 		});
 	}
+
 
 
 	/**
