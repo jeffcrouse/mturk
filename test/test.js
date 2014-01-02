@@ -5,31 +5,34 @@ var should = chai.should();
 var fs = require('fs')
 var libxmljs = require("libxmljs")
 var util = require('util')
-
-/*
-describe('Array', function(){
-	before(function(){
-	// ...
-	});
-
-	describe('#indexOf()', function(){
-		it('should return -1 when not present', function(){
-			[1,2,3].indexOf(4).should.equal(-1);
-		});
-	});
-});
-*/
+var path = require('path');
 
 describe('mturk', function(){
 
 	var mturk  = require("../index")({creds: creds, sandbox: true});
-	var _HITTypeId;
-	var _HITId;
+	var _datapath = path.resolve(path.join(__dirname, "../sampledata"));
 
 
-	// beforeEach(function(){
-	// 	mturk = require("../index")({creds: creds, sandbox: true})
-	// });
+	var _HITTypeId;			// For storing a HITTypeId made by any of the tests.
+	var _HITId;				// For storing a HIT made by any of the tests
+	var validateHIT = function(HIT) {
+		HIT.should.have.ownProperty("HITId");
+		HIT.should.have.ownProperty("HITTypeId");
+		HIT.should.have.ownProperty("HITGroupId");
+		HIT.should.have.ownProperty("CreationTime");
+		HIT.should.have.ownProperty("Title");
+		HIT.should.have.ownProperty("Description");
+		HIT.should.have.ownProperty("HITStatus");
+		HIT.should.have.ownProperty("MaxAssignments");
+		HIT.should.have.ownProperty("Reward");
+		HIT.should.have.ownProperty("AutoApprovalDelayInSeconds");
+		HIT.should.have.ownProperty("Expiration");
+		HIT.should.have.ownProperty("AssignmentDurationInSeconds");
+		HIT.should.have.ownProperty("HITReviewStatus");
+	}
+
+
+	//beforeEach(function(){ });
 
 
 
@@ -39,7 +42,7 @@ describe('mturk', function(){
 	*/
 	describe("#libxmlToJSON()", function(){
 		it('should successfully convert a getHITResponse to a JSON structure', function(){
-			fs.readFile(__dirname+"/GetHITResponse.xml", 'utf8', function(err, xml){
+			fs.readFile(_datapath+"/GetHITResponse.xml", 'utf8', function(err, xml){
 				if(err) throw err;
 
 				var doc = libxmljs.parseXml(xml);
@@ -58,17 +61,17 @@ describe('mturk', function(){
 
 
 	/**
-	*	Sanity check: mturk object properties
+	* Sanity check: mturk object properties
 	*/
 	describe("properties", function(){
 
 		it("should have credentials set", function(){
 			mturk.should.have.property("accessKey");
 			mturk.accessKey.should.be.a("String");
-			mturk.accessKey.should.have.length(20); //  not sure if it's always 40...
+			mturk.accessKey.should.have.length(20); //  TODO: confirm that it's always 40...
 			mturk.should.have.property("secretKey");
 			mturk.secretKey.should.be.a("String");
-			mturk.secretKey.should.have.length(40); //  not sure if it's always 40...
+			mturk.secretKey.should.have.length(40); //  TODO: confirm that it's always 40...
 		});
 
 		it('should have some qualifications defined', function(){
@@ -127,7 +130,7 @@ describe('mturk', function(){
 	*/
 	describe("#CreateHIT()", function(){
 		it('should create a HITTypeId/ExternalQuestion HIT and return the new HITId', function(done){
-			fs.readFile(__dirname+"/externalQuestion.xml", 'utf8', function(err, questionXML) {
+			fs.readFile(_datapath+"/ExternalQuestion.xml", 'utf8', function(err, questionXML) {
 				if (err) throw err;
 				var options = {
 					'HITTypeId': _HITTypeId
@@ -148,7 +151,7 @@ describe('mturk', function(){
 
 	
 		it('should create a HITTypeId/QuestionForm HIT and return the new HITId', function(done){
-			fs.readFile(__dirname+"/QuestionForm.xml", 'utf8', function(err, questionXML) {
+			fs.readFile(_datapath+"/QuestionForm.xml", 'utf8', function(err, questionXML) {
 				if (err) throw err;
 				var options = {
 					'HITTypeId': _HITTypeId
@@ -168,7 +171,7 @@ describe('mturk', function(){
 		});
 	
 		it('should create a HITTypeId/HTMLQuestion HIT and return the new HITId', function(done){
-			fs.readFile(__dirname+"/HTMLQuestion.xml", 'utf8', function(err, questionXML) {
+			fs.readFile(_datapath+"/HTMLQuestion.xml", 'utf8', function(err, questionXML) {
 				if (err) throw err;
 				var options = {
 					'HITTypeId': _HITTypeId
@@ -192,21 +195,8 @@ describe('mturk', function(){
 	});
 
 
-	function validateHIT(HIT) {
-		HIT.should.have.ownProperty("HITId");
-		HIT.should.have.ownProperty("HITTypeId");
-		HIT.should.have.ownProperty("HITGroupId");
-		HIT.should.have.ownProperty("CreationTime");
-		HIT.should.have.ownProperty("Title");
-		HIT.should.have.ownProperty("Description");
-		HIT.should.have.ownProperty("HITStatus");
-		HIT.should.have.ownProperty("MaxAssignments");
-		HIT.should.have.ownProperty("Reward");
-		HIT.should.have.ownProperty("AutoApprovalDelayInSeconds");
-		HIT.should.have.ownProperty("Expiration");
-		HIT.should.have.ownProperty("AssignmentDurationInSeconds");
-		HIT.should.have.ownProperty("HITReviewStatus");
-	}
+
+
 
 	/**
 	*
@@ -214,12 +204,24 @@ describe('mturk', function(){
 	describe("#GetHIT()", function(){
 		it('should get a single hit with all of the associated information', function(done){
 			mturk.GetHIT({HITId: _HITId}, function(err, HIT){
-
 				validateHIT( HIT );
 				done();
 			});
 		});
 	});
+
+
+
+
+
+	/**
+	*
+	*/
+	// describe("#GetReviewableHITs()", function(){
+
+	// });
+
+
 
 
 	/**
@@ -249,9 +251,7 @@ describe('mturk', function(){
 
 
 
-	/**
-	* 
-	*/
+	/**	
 	describe("#disableHITs()", function(){
 		this.timeout(15000);
 
@@ -266,11 +266,11 @@ describe('mturk', function(){
 			});
 		});
 	});
+	*/
 
 
-	after(function(done){
-		done();
-	});
-
+	// after(function(done){
+	// 	done();
+	// });
 
 });

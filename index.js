@@ -133,6 +133,7 @@ module.exports = function(settings) {
 
 
 	/**
+	* The BlockWorker operation allows you to prevent a Worker from working on your HITs. For example, you can block a Worker who is producing poor quality work. You can block up to 100,000 Workers.
 	*
 	* @see http://docs.aws.amazon.com/AWSMechTurk/latest/AWSMturkAPI/ApiReference_BlockWorkerOperation.html
 	* @param {Object} params Parameters for the API call
@@ -156,6 +157,38 @@ module.exports = function(settings) {
 				callback(err, null);
 			} else {
 				callback(null, params.WorkerId);
+			}
+		});
+	}
+
+
+
+	/**
+	* The ChangeHITTypeOfHIT operation allows you to change the HITType properties of a HIT. This operation disassociates the HIT from its old HITType properties and associates it with the new HITType properties. The HIT takes on the properties of the new HITType in place of the old ones. 
+	*
+	* @see http://docs.aws.amazon.com/AWSMechTurk/latest/AWSMturkAPI/ApiReference_ChangeHITTypeOfHITOperation.html
+	* @param {Object} params Parameters for the API call
+	* @param {String} params.HITId The ID of the HIT to change
+	* @param {String} params.HITTypeId The ID of the new HIT type
+	* @param {function(HITId)} callback A callback function 
+	* @throws {TypeError} if a HITTypeId or LifetimeInSeconds isn't provided
+	*/
+	mturk.ChangeHITTypeOfHIT = function(params, callback){
+		var defaults = {
+			"Operation": "ChangeHITTypeOfHIT"
+			, "HITId": null
+			, "HITTypeId": null
+		};
+
+		params = merge(defaults, params);
+		check(params.HITId).notNull();
+		check(params.HITTypeId).notNull();
+
+		this.doRequest(params, function(err, doc){
+			if(err) {
+				callback(err, null);
+			} else {
+				callback(null, params.HITId);
 			}
 		});
 	}
@@ -341,17 +374,8 @@ module.exports = function(settings) {
 			if(err) {
 				callback(err, null);
 			} else {
-				var assignments = [];
-				doc.find("//Assignment").forEach(function(elem){
-					var assignment = {
-						"AssignmentId": elem.get("./AssignmentId").text()
-						, "WorkerId": elem.get("./WorkerId").text()
-						, "AssignmentStatus":  elem.get("./AssignmentStatus").text()
-						, "Answer": elem.get("./Answer").text()
-					};
-					assignments.push(assignment);
-				});
-				callback(null, assignments);
+				var result = mturk.libxmlToJSON( doc.get("//GetAssignmentsForHITResult") );
+				callback(null, result);
 			}
 		});
 	}
@@ -436,11 +460,8 @@ module.exports = function(settings) {
 			if(err) {
 				callback(err, null);
 			} else {
-				var hits = [];
-				doc.find("//HITId").forEach(function(elem){
-					hits.push(  elem.text()  );
-				});
-				callback(null, hits);
+				var result = mturk.libxmlToJSON( doc.get("//GetReviewableHITsResult") );
+				callback(null, result);
 			}
 		});
 	}
@@ -740,6 +761,7 @@ module.exports = function(settings) {
 
 		var url = util.format("%s/?%s", this.getEndpoint(), makeQuery(params));
 		request(url, function(error, response, xml) {
+			//console.log( xml );
 			if (error) {
 				callback(err, null);
 			} else if(response.statusCode != 200) {
