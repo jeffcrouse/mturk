@@ -208,7 +208,7 @@ module.exports = function(settings) {
 	* @param {String} params.HITTypeId The HIT type ID
 	* @param {String} [params.Question] The data the person completing the HIT uses to produce the results. Must be a QuestionForm data structure, an ExternalQuestion data structure, or an HTMLQuestion data structure. The XML question data must not be larger than 64 kilobytes (65,535 bytes) in size, including whitespace
 	* @param {String} [params.HITLayoutId] The HITLayoutId allows you to use a pre-existing HIT design with placeholder values and create an additional HIT by providing those values as HITLayoutParameters. 
-	* @param {String} [params.HITLayoutParameter] If the HITLayoutId is provided, any placeholder values must be filled in with values using the HITLayoutParameter structure. 
+	* @param {String} [params.HITLayoutParameters] If the HITLayoutId is provided, the HITLayoutParameter structure is generated out of a JSON object of representing the parameters. 
 	* @param {String} params.LifetimeInSeconds The number of seconds after which the HIT is no longer available for users to accept. After the lifetime of the HIT has elapsed, the HIT no longer appears in HIT searches, even if not all of the HIT's assignments have been accepted.
 	* @param {String} [params.MaxAssignments=1] The number of times the HIT can be accepted and completed before the HIT becomes unavailable.
 	* @param {String} [params.AssignmentReviewPolicy] The Assignment-level Review Policy applies to the assignments under the HIT. You can specify for Mechanical Turk to take various actions based on the policy. 
@@ -226,11 +226,14 @@ module.exports = function(settings) {
 			, "LifetimeInSeconds": null
 		};
 		params = merge(defaults, params);
+
+		if('HITLayoutId' in params && 'HITLayoutParameters' in params)
+			layoutParams(params);
 		
 		check(params.HITTypeId).notNull();
 		check(params.LifetimeInSeconds).notNull().isInt().min(30).max(31536000);
 
-		if(!params.hasOwnProperty("Question") && params.hasOwnProperty("HITLayoutId"))
+		if(!(!params.hasOwnProperty("Question") ^ !params.hasOwnProperty("HITLayoutId")))
 			throw new Error("You must provide Either a Question parameter or a HITLayoutId parameter");
 
 		//if(params.hasOwnProperty("Question"))
@@ -495,7 +498,6 @@ module.exports = function(settings) {
 			, "Description" : "no description"
 			, "Reward" : null
 			, "AssignmentDurationInSeconds": 0
-			, 'QualificationRequirement': null
 		};
 		params = merge(defaults, params);
 		
@@ -510,13 +512,13 @@ module.exports = function(settings) {
 			}); 
 		}
 			
-		// Make sure that Reward is an array of reward objects
+		// Checks if a qualification requirement has been assigned
 		if(params.hasOwnProperty("QualificationRequirement")) {
 			if(!Array.isArray(params.QualificationRequirement))
 				params.QualificationRequirement = [params.QualificationRequirement];
 
 			params.QualificationRequirement.forEach(function(qual){
-				//check(qual.QualificationTypeId).notNull().isInt();
+				// check(qual.QualificationTypeId).notNull().isInt();
 				check(qual.Comparator).notNull().isIn(["LessThan", "LessThanOrEqualTo", "GreaterThan", "GreaterThanOrEqualTo", "EqualTo", "NotEqualTo", "Exists"]);
 				// TO DO: add more checks
 			});
@@ -772,8 +774,8 @@ module.exports = function(settings) {
 					callback(params.Operation+": "+doc.errors[0], null);
 				} else {
 					var error = doc.get("//Error/Message");
-					var valid = doc.get("//Request/IsValid").text()=="True";
-					if(error || !valid ) {
+					var valid = doc.get("//Request/IsValid");//=="True";
+					if(error || valid.text() == "False" ) {
 						callback(params.Operation+": "+error.text(), null);
 					} else {
 						callback(null, doc);
@@ -802,6 +804,21 @@ module.exports = function(settings) {
 		for (var attrname in obj1) { obj3[attrname] = obj1[attrname]; }
 		for (var attrname in obj2) { obj3[attrname] = obj2[attrname]; }
 		return obj3;
+	}
+
+
+	/**
+	*
+	*/
+	function layoutParams(params){
+		var i = 1
+			, str;
+		for (var name in params.HITLayoutParameters) {
+			str = 'HITLayoutParameter.'+(i++);
+			params[str+'.Name'] = name;
+			params[str+'.Value'] = params.HITLayoutParameters[name];
+		}
+		return params;
 	}
 
 	return mturk;
