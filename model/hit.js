@@ -95,6 +95,70 @@ module.exports = function(config) {
   };
 
   /*
+  * create a hit with a HITLayout
+  * 
+  * can use the amazon requester UI to create layouts that are given parameters
+  */
+  HIT.prototype.createWithLayout = function(params,callback) {
+    var self = this,
+        calledback = false;
+
+    if (! this.valid()) { return callback(this.errors); }
+    var remoteErrors
+      , options = {
+          HITTypeId: self.hitTypeId
+        , HITLayoutId: this.question
+        , LifetimeInSeconds: self.lifeTimeInSeconds
+      }
+      , count = 1
+      , str;
+    if (self.maxAssignments) options.MaxAssignments =  self.maxAssignments;
+    if (self.requesterAnnotation) options.RequesterAnnotation =  self.requesterAnnotation;
+    console.log(options);
+    for (var name in params) {
+      str = 'HITLayoutParameter.'+count+'.Name';
+      options[str] = name;
+      str = 'HITLayoutParameter.'+(count++)+'.Value';
+      options[str] = params[name];
+    }
+    request('AWSMechanicalTurkRequester', 'CreateHIT', 'POST', options, function(err, response) {
+      if (err) { return callback([err]); }
+
+      remoteErrors = self.remoteRequestValidationError(response.HIT);
+      if (remoteErrors) { return callback(remoteErrors.map(function(error) { return new Error(error); })); }
+      delete response.HIT.Request;
+
+      self.populateFromResponse(response.HIT);
+      if (err) { err = [err]; }
+      callback(err);
+    });
+  };
+
+  /*
+   * create a HIT with a HITLayout
+   *
+   * @param {hitTypeId} the HIT type id (string)
+   * @param {hitLayoutId} the layoutId (string)
+   * @param {hitLayoutParams} the layout parameters (object)
+   * @param {lifeTimeInSeconds} the lifetime, in seconds (int)
+   * @param {options.maxAssignments} the maximum number of assignments. defaults to 1 (int). Optional.
+   * @param {options.requesterAnnotation} annotations only viewable by the requester (you). (string with max 255 chars). Optional.
+   * @param {callback} function with signature (Array errors || null, HIT hit)
+   *
+   */
+  ret.createWithLayout = function(hitTypeId, hitLayoutId, hitLayoutParams, lifeTimeInSeconds, options, callback) {
+    if (! options) options = {};
+    var maxAssignments = options.maxAssignments
+      , requesterAnnotation = options.requesterAnnotation
+      , hit = new HIT(hitTypeId, hitLayoutId, lifeTimeInSeconds, maxAssignments, requesterAnnotation);
+
+    hit.createWithLayout( hitLayoutParams, function(err) {
+      if (err) { callback(err); return; }
+      callback(null, hit);
+    });
+  };
+
+  /*
    * force expire a HIT
    *
    * @param {hitId} the ID of the HIT to expire
