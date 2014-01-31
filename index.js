@@ -495,7 +495,6 @@ module.exports = function(settings) {
 			, "Description" : "no description"
 			, "Reward" : null
 			, "AssignmentDurationInSeconds": 0
-			, 'QualificationRequirement': null
 		};
 		params = merge(defaults, params);
 		
