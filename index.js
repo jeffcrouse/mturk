@@ -5,6 +5,8 @@
  * MIT Licensed
  */
 
+if( Npm ) require = Npm.require; // Allow this to be pulled into a Meteor smart package
+
 var crypto = require('crypto')
 	, request = require('request')
 	, libxml = require("libxmljs")
@@ -21,7 +23,8 @@ var crypto = require('crypto')
 *
 * @see http://docs.amazonwebservices.com/AWSMechTurk/latest/AWSMturkAPI/ApiReference_OperationsArticle.html
 */
-module.exports = function(settings) {
+// module.exports
+mturk = function(settings) {
 
 	var mturk = {};
 	mturk.accessKey = settings.creds.accessKey;
