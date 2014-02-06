@@ -317,7 +317,55 @@ mturk = function(settings) {
 		});
 	}
 
+  /**
+   * Extend the assignments or expiration of a HIT
+   *
+   * @see http://docs.aws.amazon.com/AWSMechTurk/latest/AWSMturkAPI/ApiReference_ExtendHITOperation.html
+   *
+   */
+  mturk.ExtendHIT = function(params, callback) {
+    var defaults = {
+      "Operation": "ExtendHIT"
+      , "HITId": null
+    };
+    params = merge(defaults, params);
 
+    check(params.HITId).notNull();
+    // TODO other checks
+
+    this.doRequest(params, function(err, doc){
+      if(err) {
+        callback(err, null);
+      } else {
+        callback(null, true);
+      }
+    });
+  }
+
+  /**
+   * Force Expire a HIT
+   *
+   * @see http://docs.aws.amazon.com/AWSMechTurk/latest/AWSMturkAPI/ApiReference_ForceExpireHITOperation.html
+   *
+   */
+  mturk.ForceExpireHIT = function(params, callback) {
+    var defaults = {
+      "Operation": "ForceExpireHIT"
+      , "HITId": null
+    };
+    params = merge(defaults, params);
+
+    check(params.HITId).notNull();
+    // TODO other checks
+
+    this.doRequest(params, function(err, doc){
+      if(err) {
+        callback(err, null);
+      } else {
+        callback(null, true);
+      }
+    });
+  }
 
 	/**
 	* Gets the account balance for the account
