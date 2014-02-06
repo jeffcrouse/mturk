@@ -798,7 +798,7 @@ mturk = function(settings) {
 		request(url, function(error, response, xml) {
 			//console.log( xml );
 			if (error) {
-				callback(err, null);
+				callback(error, null);
 			} else if(response.statusCode != 200) {
 				var doc = libxml.parseXml(xml);
 				var errMsg = doc.get("//Error/Message").text();
