@@ -635,7 +635,37 @@ module.exports = function(settings) {
 	}
 
 
+	/**
+	* The SetHITTypeNotification operation creates, updates, disables or re-enables notifications for a HIT type.
+	*
+	* @see http://docs.aws.amazon.com/AWSMechTurk/latest/AWSMturkAPI/ApiReference_SetHITTypeNotificationOperation.html
+	* @param {Object} params Parameters for the API call
+	* @param {Boolean} params.Active Set on or off
+	* @param {String} params.HITTypeId The ID of the new HIT type
+	* @param {Object} params.Notification See the documentation eg {"Destination": "REST", "EventType": ['HITReviewable'], "Version": "2006-05-05", "Destination": "http://api.poutsch.com/turk/ping"}
+	* @param {function(HITId)} callback A callback function
+	* @throws {TypeError} if a HITTypeId or Notification isn't provided
+	*/
+	mturk.SetHITTypeNotification = function(params, callback){
+		var defaults = {
+			"Operation": "SetHITTypeNotification"
+			, "Notification": null
+			, "HITTypeId": null
+			, "Active": true
+		};
 
+		params = merge(defaults, params);
+		check(params.Notification).notNull();
+		check(params.HITTypeId).notNull();
+
+		this.doRequest(params, function(err, doc){
+			if(err) {
+				callback(err, null);
+			} else {
+				callback(null, params.HITId);
+			}
+		});
+	}
 
 /**************************************************************************
   _                _                            _   _               _     
