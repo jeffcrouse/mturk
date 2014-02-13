@@ -5,7 +5,13 @@
  * MIT Licensed
  */
 
-if( Npm ) require = Npm.require; // Allow this to be pulled into a Meteor smart package
+if( Npm ) {
+    // Allow this to be pulled directly into a Meteor smart package in development
+    // i.e. https://github.com/HarvardEconCS/turkserver-meteor
+    require = Npm.require;
+    mturkModule = {};
+    var module = mturkModule;
+}
 
 var crypto = require('crypto')
 	, request = require('request')
@@ -23,8 +29,7 @@ var crypto = require('crypto')
 *
 * @see http://docs.amazonwebservices.com/AWSMechTurk/latest/AWSMturkAPI/ApiReference_OperationsArticle.html
 */
-// module.exports
-mturk = function(settings) {
+module.exports = function(settings) {
 
 	var mturk = {};
 	mturk.accessKey = settings.creds.accessKey;
