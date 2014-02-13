@@ -38,7 +38,9 @@ The HIT Type defines a bunch of things about the HIT such as approval time, rewa
 
 ### Create a HIT
 
-Assumes you have `HITTypeId` (like the one created in the previous step) and some XML (`questionXML`) that is a [QuestionForm](http://docs.aws.amazon.com/AWSMechTurk/latest/AWSMturkAPI/ApiReference_QuestionFormDataStructureArticle.html) data structure, an [ExternalQuestion](http://docs.aws.amazon.com/AWSMechTurk/latest/AWSMturkAPI/ApiReference_ExternalQuestionArticle.html) data structure, or an [HTMLQuestion](http://docs.aws.amazon.com/AWSMechTurk/latest/AWSMturkAPI/ApiReference_HTMLQuestionArticle.html) data structure.
+Assumes you have `HITTypeId` (like the one created in the previous step) and some XML (`questionXML`) that is a [QuestionForm](http://docs.aws.amazon.com/AWSMechTurk/latest/AWSMturkAPI/ApiReference_QuestionFormDataStructureArticle.html) data structure, an [ExternalQuestion](http://docs.aws.amazon.com/AWSMechTurk/latest/AWSMturkAPI/ApiReference_ExternalQuestionArticle.html) data structure, an [HTMLQuestion](http://docs.aws.amazon.com/AWSMechTurk/latest/AWSMturkAPI/ApiReference_HTMLQuestionArticle.html) data structure, or a [HITLayoutId](http://docs.aws.amazon.com/AWSMechTurk/latest/AWSMturkAPI/ApiReference_HITLayoutArticle.html) with optional parameters.
+
+	Use XML:
 
 	var CreateHITOptions = {
 		'HITTypeId': HITTypeId
@@ -51,6 +53,17 @@ Assumes you have `HITTypeId` (like the one created in the previous step) and som
 		if (err) throw err;
 		console.log("Created HIT "+HITId);
 	});
+
+
+	Or use a Layout:
+
+	var LayoutOptions = {
+	    'HITTypeId': HITTypeId
+	    , 'HITLayoutId': layoutId
+	    , 'HITLayoutParameters': {
+	    	foo: 'bar'
+	    }
+	};
 
 
 ### Fetch Reviewalbe HITs
