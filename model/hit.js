@@ -114,7 +114,7 @@ module.exports = function(config) {
       , str;
     if (self.maxAssignments) options.MaxAssignments =  self.maxAssignments;
     if (self.requesterAnnotation) options.RequesterAnnotation =  self.requesterAnnotation;
-    console.log(options);
+    // console.log(options);
     for (var name in params) {
       str = 'HITLayoutParameter.'+count+'.Name';
       options[str] = name;
