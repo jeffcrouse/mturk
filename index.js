@@ -5,7 +5,7 @@
  * MIT Licensed
  */
 
-if( Npm ) {
+if( typeof Npm !== 'undefined' ) {
     // Allow this to be pulled directly into a Meteor smart package in development
     // i.e. https://github.com/HarvardEconCS/turkserver-meteor
     require = Npm.require;
