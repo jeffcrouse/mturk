@@ -139,6 +139,31 @@ module.exports = function(settings) {
     });
   }
 
+  /**
+   * @see http://docs.aws.amazon.com/AWSMechTurk/latest/AWSMturkAPI/ApiReference_AssignQualificationOperation.html
+   */
+  mturk.AssignQualification = function(params, callback) {
+    var defaults = {
+      "Operation": "AssignQualification",
+      "QualificationTypeId": null,
+      "WorkerId": null,
+      "IntegerValue": 1,
+      "SendNotification": true
+    };
+
+    params = merge(defaults, params);
+
+    check(params.QualificationTypeId).notNull();
+    check(params.WorkerId).notNull();
+
+    this.doRequest(params, function(err, doc){
+      if (err) {
+        callback(err, null);
+      } else {
+        callback(null);
+      }
+    });
+  };
 
   /**
   * The BlockWorker operation allows you to prevent a Worker from working on your HITs. For example, you can block a Worker who is producing poor quality work. You can block up to 100,000 Workers.
@@ -525,8 +550,36 @@ module.exports = function(settings) {
     });
   }
 
+  /**
+   * @see http://docs.aws.amazon.com/AWSMechTurk/latest/AWSMturkAPI/ApiReference_NotifyWorkersOperation.html
+   */
+  mturk.NotifyWorkers = function(params, callback) {
+    var defaults = {
+      "Operation": "NotifyWorkers",
+      "Subject": null,
+      "MessageText": null,
+      "WorkerId": null
+    };
 
+    params = merge(defaults, params);
 
+    check(params.Subject).notNull();
+    check(params.MessageText).notNull();
+    // Can be String (one worker) or Array (up to 100 workers)
+    check(params.WorkerId).notNull();
+
+    if( Array.isArray(params.WorkerId) ) {
+      check(params.WorkerId.length).isInt().max(100);
+    }
+
+    this.doRequest(params, function(err, doc) {
+      if(err) {
+        callback(err, null);
+      } else {
+        callback(null);
+      }
+    });
+  };
 
   /**
   * Create a new HitType
