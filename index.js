@@ -551,6 +551,44 @@ module.exports = function(settings) {
   }
 
   /**
+   * @see http://docs.aws.amazon.com/AWSMechTurk/latest/AWSMturkAPI/ApiReference_GrantBonusOperation.html
+   */
+  mturk.GrantBonus = function(params, callback) {
+    var defaults = {
+      "Operation": "GrantBonus",
+      "WorkerId": null,
+      "AssignmentId": null,
+      "BonusAmount": null,
+      "Reason": null
+    };
+
+    params = merge(defaults, params);
+
+    check(params.WorkerId).notNull();
+    check(params.AssignmentId).notNull();
+    check(params.BonusAmount).notNull();
+    // BonusAmount needs to be array-ified, just like reward
+    if(params.hasOwnProperty("BonusAmount")) {
+      if( !Array.isArray(params.BonusAmount) )
+        params.BonusAmount = [ params.BonusAmount ];
+
+      params.BonusAmount.forEach( function(bonus){
+        check(bonus.Amount).notNull().isFloat();
+        check(bonus.CurrencyCode).is("USD");
+      });
+    }
+    check(params.Reason).notNull();
+
+    this.doRequest(params, function(err, doc) {
+      if(err) {
+        callback(err, null);
+      } else {
+        callback(null);
+      }
+    });
+  }
+
+  /**
    * @see http://docs.aws.amazon.com/AWSMechTurk/latest/AWSMturkAPI/ApiReference_NotifyWorkersOperation.html
    */
   mturk.NotifyWorkers = function(params, callback) {
