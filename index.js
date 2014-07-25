@@ -419,7 +419,29 @@ module.exports = function(settings) {
     });
   }
 
+  /**
+   * Get the details for a particular assignment.
+   *
+   * @see http://docs.aws.amazon.com/AWSMechTurk/latest/AWSMturkAPI/ApiReference_GetAssignmentOperation.html
+   */
+  mturk.GetAssignment = function(params, callback) {
+    var defaults = {
+      "Operation": "GetAssignment",
+      "AssignmentId": null
+    };
+    params = merge(defaults, params);
 
+    check(params.AssignmentId).notNull();
+
+    this.doRequest(params, function(err, doc){
+      if(err) {
+        callback(err, null);
+      } else {
+        var result = mturk.libxmlToJSON( doc.get("//Assignment") );
+        callback(null, result);
+      }
+    });
+  };
 
   /**
   * The GetAssignmentsForHIT operation retrieves completed assignments for a HIT. You can use this operation to retrieve the results for a HIT.
