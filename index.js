@@ -123,7 +123,7 @@ module.exports = function(settings) {
   */
   mturk.ApproveRejectedAssignment = function(params, callback) {
     var defaults = {
-      "Operation": "ApproveAssignment"
+      "Operation": "ApproveRejectedAssignment"
       , "AssignmentId": null
       , "RequesterFeedback": null
     };
