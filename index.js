@@ -35,7 +35,7 @@ module.exports = function(settings) {
   mturk.accessKey = settings.creds.accessKey;
   mturk.secretKey = settings.creds.secretKey;
   mturk.sandbox = settings.sandbox || false;
-  mturk.version = "2012-03-25";
+  mturk.version = "2013-11-15";
   mturk.service = "AWSMechanicalTurkRequester";
 
   /**
@@ -688,8 +688,14 @@ module.exports = function(settings) {
 
       params.QualificationRequirement.forEach(function(qual){
         // check(qual.QualificationTypeId).notNull().isInt();
-        check(qual.Comparator).notNull().isIn(["LessThan", "LessThanOrEqualTo", "GreaterThan", "GreaterThanOrEqualTo", "EqualTo", "NotEqualTo", "Exists"]);
-        // TO DO: add more checks
+        check(qual.Comparator).notNull().isIn([
+          "LessThan", "LessThanOrEqualTo",
+          "GreaterThan", "GreaterThanOrEqualTo",
+          "EqualTo", "NotEqualTo",
+          "Exists", "DoesNotExist",
+          "In", "NotIn"]);
+
+        // TODO: add more checks, such as for qual details
       });
     }
 
