@@ -840,7 +840,33 @@ module.exports = function(settings) {
         callback(null, params.HITId);
       }
     });
-  }
+  };
+
+  /**
+   * @see http://docs.aws.amazon.com/AWSMechTurk/latest/AWSMturkAPI/ApiReference_UpdateQualificationScoreOperation.html
+   */
+  mturk.UpdateQualificationScore = function(params, callback) {
+    var defaults = {
+      "Operation": "UpdateQualificationScore"
+      , "QualificationTypeId": null
+      , "SubjectId": null
+      , "IntegerValue": null
+    };
+
+    params = merge(defaults, params);
+
+    check(params.QualificationTypeId).notNull();
+    check(params.SubjectId).notNull();
+    check(params.IntegerValue).notNull().isInt();
+
+    this.doRequest(params, function(err, doc){
+      if(err) {
+        callback(err);
+      } else {
+        callback(null);
+      }
+    });
+  };
 
 /**************************************************************************
   _                _                            _   _               _     
