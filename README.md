@@ -8,7 +8,15 @@ This module is for working with the [Mechanical Turk](https://www.mturk.com/mtur
 
 # Install
 
-    npm install mturk
+The development of this package has diverged from what's installed on NPM. For
+the old version, you may want to see the
+[**legacy**](https://github.com/jefftimesten/mturk/tree/legacy) branch, or
+perhaps [this more active fork](https://github.com/alantrrs/mturk).
+
+This package is not currently fully documented and tested, but it is a
+straightforward replication of the MTurk API, and is used in packages such as
+[TurkServer](https://github.com/HarvardEconCS/turkserver-meteor). The easiest
+way to install is to check it out as a submodule into your Node project.
 
 # Use
 You must sign up for a Mechanical Turk account and then find [your Access Key and Secret Key](http://docs.aws.amazon.com/AWSMechTurk/latest/AWSMechanicalTurkRequester/MakingRequests_RequestAuthenticationArticle.html).
@@ -34,7 +42,6 @@ The HIT Type defines a bunch of things about the HIT such as approval time, rewa
 		if (err) throw err;
 		console.log("Registered HIT type "+HITTypeId);
 	});
-
 
 ### Create a HIT
 
@@ -65,11 +72,12 @@ Assumes you have `HITTypeId` (like the one created in the previous step) and som
 	    }
 	};
 
+### Fetch Reviewable HITs
 
-### Fetch Reviewalbe HITs
 coming soon...
 
 ### Approve a HIT
+
 coming soon...
 
 # Test
@@ -82,13 +90,10 @@ Then you can run
 
 	npm test
 
-
-
 ## To Do
 - Tests for existing API methods that don't have them
 - Systematic API method implementation
 - Make some simple examples
-
 
 ## Other Reading
 
