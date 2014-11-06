@@ -781,6 +781,36 @@ module.exports = function(settings) {
   }
 
   /**
+   * The SendTestEventNotification operation causes Amazon Mechanical Turk to send a notification message as if a HIT event occurred, according to the provided notification specification. This allows you to test notifications without setting up notifications for a real HIT type and trying to trigger them using the website.
+   *
+   * @see http://docs.aws.amazon.com/AWSMechTurk/latest/AWSMturkAPI/ApiReference_SendTestEventNotificationOperation.html
+   * @see http://docs.aws.amazon.com/AWSMechTurk/latest/AWSMturkAPI/ApiReference_NotificationDataStructureArticle.html
+   * @param {Object} params Parameters for the API call
+   * @param {Object} params.Notification The Notification data structure to test. (See the documentation, e.g. {"Destination": "REST", "EventType": ['HITReviewable'], "Version": "2006-05-05", "Destination": "http://api.poutsch.com/turk/ping"})
+   * @param {String} params.TestEventType The name of the event type of test, one of [AssignmentAccepted, AssignmentAbandoned, AssignmentReturned, AssignmentSubmitted, HITReviewable, HITExpired, Ping] (Ping only valid for testing).
+   * @throws {TypeError} if Notification or TestEventType isn't provided
+   */
+  mturk.SendTestEventNotification = function(params, callback){
+    var defaults = {
+      "Operation": "SendTestEventNotification"
+      , "Notification": null
+      , "TestEventType": null
+    };
+    params = merge(defaults, params);
+
+    check(params.Notification).notNull();
+    check(params.TestEventType).notNull();
+
+    this.doRequest(params, function(err, doc){
+      if(err) {
+        callback(err);
+      } else {
+        callback(null, doc);    // return actual doc for testing!!
+      }
+    });
+  }
+
+  /**
   * The SetHITAsReviewing operation updates the status of a HIT. If the status is Reviewable, this operation updates the status to Reviewing, or reverts a Reviewing HIT back to the Reviewable status.
   *
   * @see http://docs.aws.amazon.com/AWSMechTurk/latest/AWSMturkAPI/ApiReference_SetHITAsReviewingOperation.html
