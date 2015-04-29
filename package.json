@@ -18,6 +18,36 @@
   ],
   "author": "Jeff Crouse",
   "license": "MIT",
+  "contributors": [
+    {
+      "name": "Pedro Teixeira",
+      "url": "https://github.com/pgte"
+    },
+    {
+      "name": "Jeff Crouse",
+      "url": "https://github.com/jefftimesten"
+    },
+    {
+      "name": "Andrew Mao",
+      "url": "https://github.com/mizzao"
+    },
+    {
+      "name": "Dom Parise",
+      "url": "https://github.com/dparise"
+    },
+    {
+      "name": "Steve Rubin",
+      "url": "https://github.com/srubin"
+    },
+    {
+      "name": "Geoffrey Plitt",
+      "url": "https://github.com/GeoffreyPlitt"
+    },
+    {
+      "name": " Micah Silverman",
+      "url": "https://github.com/dogeared"
+    }
+  ],
   "bugs": {
     "url": "https://github.com/jefftimesten/mturk/issues"
   },
