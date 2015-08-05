@@ -724,7 +724,7 @@ module.exports = function(settings) {
   *
   * @see http://docs.aws.amazon.com/AWSMechTurk/latest/AWSMturkAPI/ApiReference_RejectAssignmentOperation.html
   * @param {Object} params Parameters for the API call
-  * @param {String} params.AssinmentId The ID of the assignment. This parameter must correspond to a HIT created by the Requester.
+  * @param {String} params.AssignmentId The ID of the assignment. This parameter must correspond to a HIT created by the Requester.
   * @param {String} [params.RequesterFeedback] A message for the Worker, which the Worker can see in the Status section of the web site.
   * @param {function()} callback A callback function
   * @throws {TypeError} if a AssignmentId isn't provided
@@ -738,7 +738,7 @@ module.exports = function(settings) {
     params = merge(defaults, params);
     check(params.AssignmentId).notNull();
 
-    this.doRequest(params, function(err, doc){
+    this.doRequest(params, function(err, doc) {
       if(err) {
         callback(err, null);
       } else {
@@ -747,7 +747,32 @@ module.exports = function(settings) {
     });
   }
 
+  /**
+   * The RevokeQualification operation revokes a previously granted Qualification from a user.
+   *
+   * @see http://docs.aws.amazon.com/AWSMechTurk/latest/AWSMturkAPI/ApiReference_RevokeQualificationOperation.html
+   */
+  mturk.RevokeQualification = function(params, callback) {
+    var defaults = {
+      "Operation": "RevokeQualification",
+      "SubjectId": null,
+      "QualificationTypeId": null,
+      "Reason": null
+    };
 
+    params = merge(defaults, params);
+
+    check(params.SubjectId).notNull();
+    check(params.QualificationTypeId).notNull();
+
+    this.doRequest(params, function(err, doc) {
+      if(err) {
+        callback(err, null);
+      } else {
+        callback(null, true);
+      }
+    });
+  };
 
   /**
   * The The SearchHITs operation returns all of a Requester's HITs, on behalf of the Requester.
