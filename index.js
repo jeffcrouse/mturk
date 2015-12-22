@@ -263,7 +263,7 @@ module.exports = function(settings) {
     if('HITLayoutId' in params && 'HITLayoutParameters' in params)
       layoutParams(params);
 
-    check(params.HITTypeId).notNull();
+    check(params.HITTypeId || params.HITLayoutId).notNull();
     check(params.LifetimeInSeconds).notNull().isInt().min(30).max(31536000);
 
     if(!(!params.hasOwnProperty("Question") ^ !params.hasOwnProperty("HITLayoutId")))
