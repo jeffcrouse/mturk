@@ -437,8 +437,9 @@ module.exports = function(settings) {
       if(err) {
         callback(err, null);
       } else {
-        var result = get(doc, "GetAssignmentResponse.GetAssignmentResult.Assignment");
-        callback(null, result);
+        var assignment = get(doc, "GetAssignmentResponse.GetAssignmentResult.Assignment");
+        var hit = get(doc, "GetAssignmentResponse.GetAssignmentResult.HIT");
+        callback(null, assignment, hit);
       }
     });
   };
