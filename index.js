@@ -15,7 +15,7 @@ if( typeof Npm !== 'undefined' ) {
 
 var crypto = require('crypto')
   , request = require('request')
-  , libxml = require("libxmljs")
+  , xml2js = require('xml2js').Parser()
   , util = require('util')
   , check = require('validator').check
   , sanitize = require('validator').sanitize
@@ -263,7 +263,7 @@ module.exports = function(settings) {
     if('HITLayoutId' in params && 'HITLayoutParameters' in params)
       layoutParams(params);
 
-    check(params.HITTypeId).notNull();
+    check(params.HITTypeId || params.HITLayoutId).notNull();
     check(params.LifetimeInSeconds).notNull().isInt().min(30).max(31536000);
 
     if(!(!params.hasOwnProperty("Question") ^ !params.hasOwnProperty("HITLayoutId")))
@@ -276,9 +276,9 @@ module.exports = function(settings) {
       if(err) {
         callback(err, null);
       } else {
-        var HITId = doc.get("//HITId");
+        var HITId = get(doc, "CreateHITResponse.HIT.HITId");
         if(HITId) {
-          callback(null, HITId.text());
+          callback(null, HITId);
         } else {
           callback("Couldn't find HITId in response", null);
         }
@@ -411,9 +411,9 @@ module.exports = function(settings) {
       if(err) {
         callback(err, null);
       } else {
-        var balance = doc.get("//GetAccountBalanceResult/AvailableBalance/Amount");
+        var balance = get(doc, "GetAccountBalanceResponse.GetAccountBalanceResult.AvailableBalance.Amount");
         if(balance) {
-          callback(null, parseFloat(balance.text()));
+          callback(null, parseFloat(balance));
         }
       }
     });
@@ -437,8 +437,9 @@ module.exports = function(settings) {
       if(err) {
         callback(err, null);
       } else {
-        var result = mturk.libxmlToJSON( doc.get("//Assignment") );
-        callback(null, result);
+        var assignment = get(doc, "GetAssignmentResponse.GetAssignmentResult.Assignment");
+        var hit = get(doc, "GetAssignmentResponse.GetAssignmentResult.HIT");
+        callback(null, assignment, hit);
       }
     });
   };
@@ -480,7 +481,7 @@ module.exports = function(settings) {
       if(err) {
         callback(err, null);
       } else {
-        var result = mturk.libxmlToJSON( doc.get("//GetAssignmentsForHITResult") );
+        var result = get(doc, "GetAssignmentsForHITResponse.GetAssignmentsForHITResult");
         callback(null, result);
       }
     });
@@ -510,7 +511,7 @@ module.exports = function(settings) {
         callback(err, null);
       } else {
         try {
-          var hit = mturk.libxmlToJSON( doc.get("//HIT") );
+          var hit = get(doc, "GetHITResponse.HIT");
           callback(null, hit);
         } catch(err) {
           callback(err, null);
@@ -566,7 +567,7 @@ module.exports = function(settings) {
       if(err) {
         callback(err, null);
       } else {
-        var result = mturk.libxmlToJSON( doc.get("//GetReviewableHITsResult") );
+        var result = get(doc, "GetReviewableHITsResponse.GetReviewableHITsResult");
         callback(null, result);
       }
     });
@@ -708,9 +709,9 @@ module.exports = function(settings) {
       if(err) {
         callback(err, null);
       } else {
-        var HITTypeId = doc.get("//HITTypeId");
+        var HITTypeId = get(doc, "RegisterHITTypeResponse.RegisterHITTypeResult.HITTypeId");
         if(HITTypeId) {
-          callback(null, HITTypeId.text());
+          callback(null, HITTypeId);
         } else {
           callback("Couldn't find HITTypeId in response", null);
         }
@@ -799,7 +800,7 @@ module.exports = function(settings) {
       if(err) {
         callback(err, null);
       } else {
-        var result = mturk.libxmlToJSON( doc.get("//SearchHITsResult") );
+        var result = get(doc, "SearchHITsResponse.SearchHITsResult");
         callback(null, result);
       }
     });
@@ -991,42 +992,49 @@ module.exports = function(settings) {
     return pairs.join("&");
   }
 
+  function get(doc, path) {
+    if (doc && path != '') {
+      var nodes = path.split('.');
+      var key = nodes.shift();
+      var node = doc[key];
+      if (node == undefined) {
+        Object.getOwnPropertyNames(doc).some(function(param_name) {
+          if ((new RegExp(key)).test(param_name)) {
+            node = doc[param_name];
+            return true;
+          } else {
+            return false;
+          }
+        });
+      }
+      return get(node, nodes.join('.'));
+    } else {
+      return doc;
+    }
+  }
+
   function trim1(str) {
       return str.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
   }
 
-
-  /**
-  *
-  * @see https://github.com/polotek/libxmljs/blob/master/docs/api/Element.md
-  */
-  mturk.libxmlToJSON = function(elem) {
-    var converted = {};
-
-    if(elem.name()=="text") {
-      return trim1( elem.text() )
+  mturk.xml2js2JSON = function(elem) {
+    if (typeof elem === 'string' || elem instanceof String) {
+      return elem;
+    } else if (elem && elem.length && elem.length <= 1) {
+      return mturk.xml2js2JSON(elem[0]);
+    } else if (elem && elem.length) {
+      var converted = [];
+      for (var i = 0; i < elem.length; i++) {
+        converted.push(mturk.xml2js2JSON(elem[i]));
+      };
+      return converted;
+    } else {
+      var converted = {};
+      Object.getOwnPropertyNames(elem).forEach(function(key) {
+        converted[key] = mturk.xml2js2JSON(elem[key]);
+      });
+      return converted;
     }
-
-    elem.childNodes().forEach(function(it){
-      var name = it.name();
-      var value = mturk.libxmlToJSON(it);
-      if(value) {
-        if(name=="text") {
-          converted = value;
-        } else if(converted.hasOwnProperty(name)) {
-          if(converted[name] instanceof Array) {
-            converted[name].push( value );
-          } else {
-            var old = converted[name];
-            converted[name] = [old, value];
-          }
-        } else {
-          converted[name] = value;
-        }
-      }
-    });
-
-    return converted;
   }
 
   /**
@@ -1053,22 +1061,26 @@ module.exports = function(settings) {
       if (error) {
         callback(error, null);
       } else if(response.statusCode != 200) {
-        var doc = libxml.parseXml(xml);
-        var errMsg = doc.get("//Error/Message").text();
-        callback(params.Operation+": "+response.statusCode+" "+errMsg);
+        xml2js.parseString(xml, function(err, doc) {
+          doc = mturk.xml2js2JSON(doc);
+          var errMsg = get(doc, "Response.Request.Errors.Error.Message") || get(doc, "Response.HIT.Request.Errors.Error.Message") || err;
+          callback(params.Operation+": "+response.statusCode+" "+errMsg);
+        });
       } else {
-        var doc = libxml.parseXml(xml);
-        if(doc.errors.length>0) {
-          callback(params.Operation+": "+doc.errors[0], null);
-        } else {
-          var error = doc.get("//Error/Message");
-          var valid = doc.get("//Request/IsValid");//=="True";
-          if(error || valid.text() == "False" ) {
-            callback(params.Operation+": "+error.text(), null);
+        xml2js.parseString(xml, function(err, doc) {
+          if(err) {
+            callback(params.Operation+": "+err, null);
           } else {
-            callback(null, doc);
+            doc = mturk.xml2js2JSON(doc);
+            var error = get(doc, "Response.Request.Errors.Error.Message") || get(doc, "Response.HIT.Request.Errors.Error.Message");
+            var valid = get(doc, "Response.Request.IsValid") || get(doc, "Response.HIT.Request.IsValid");//=="True";
+            if(error || valid == "False" ) {
+              callback(params.Operation+": "+error, null);
+            } else {
+              callback(null, doc);
+            }
           }
-        }
+        });
       }
     });
   }

@@ -3,7 +3,6 @@ var chai = require("chai")
 var creds = require('./aws_creds')
 var should = chai.should();
 var fs = require('fs')
-var libxmljs = require("libxmljs")
 var util = require('util')
 var path = require('path');
 
@@ -35,29 +34,6 @@ describe('mturk', function(){
 	//beforeEach(function(){ });
 
 
-
-
-	/**
-	* mturk.libxmlToJSON()
-	*/
-	describe("#libxmlToJSON()", function(){
-		it('should successfully convert a getHITResponse to a JSON structure', function(){
-			fs.readFile(_datapath+"/GetHITResponse.xml", 'utf8', function(err, xml){
-				if(err) throw err;
-
-				var doc = libxmljs.parseXml(xml);
-				if(doc.errors.length>0) {
-					throw doc.errors[0];
-				} else {
-					var hit = doc.get("//HIT");
-					var json = mturk.libxmlToJSON( hit );
-					//console.log( util.inspect(json, {depth: 10}) );
-
-					json.should.have.property("HITId");
-				}
-			});
-		})
-	});
 
 
 	/**
