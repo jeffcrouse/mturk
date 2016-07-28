@@ -4,7 +4,10 @@
 	 / / / / / / /_/ /_/ / /  / ,<   
 	/_/ /_/ /_/\__/\__,_/_/  /_/|_|  
 
+__DEPRICATION NOTICE__ This repository is NO LONGER MAINTAINED. Please consider using [mturk-api](https://github.com/josebarrios/mturk-api).
+
 This module is for working with the [Mechanical Turk](https://www.mturk.com/mturk/) [API](http://docs.aws.amazon.com/AWSMechTurk/latest/AWSMturkAPI/Welcome.html). 
+
 
 # Install
 
